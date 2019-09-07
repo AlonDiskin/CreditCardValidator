@@ -1,0 +1,7 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="horizontal_margin">16dp</dimen>
+    <dimen name="card_detail_vertical_margin">8dp</dimen>
+    <dimen name="radio_buttons_vertical_margin">4dp</dimen>
+    <dimen name="detail_title_vertical_margin">0dp</dimen>
+</resources>
