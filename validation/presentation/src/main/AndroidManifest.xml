@@ -4,7 +4,7 @@
 
     <application>
         <activity
-            android:name=".CardValidationActivity"
+            android:name=".controller.CardValidationActivity"
             android:label="@string/title_activity_validation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">

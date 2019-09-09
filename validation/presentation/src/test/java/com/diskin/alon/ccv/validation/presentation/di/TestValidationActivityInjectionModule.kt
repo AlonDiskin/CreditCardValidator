@@ -1,6 +1,6 @@
 package com.diskin.alon.ccv.validation.presentation.di
 
-import com.diskin.alon.ccv.validation.presentation.CardValidationActivity
+import com.diskin.alon.ccv.validation.presentation.controller.CardValidationActivity
 import dagger.Module
 import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector

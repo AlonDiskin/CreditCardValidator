@@ -1,4 +1,4 @@
-package com.diskin.alon.ccv.validation.presentation
+package com.diskin.alon.ccv.validation.presentation.controller
 
 import android.os.Bundle
 import android.text.Editable
@@ -7,6 +7,10 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
+import com.diskin.alon.ccv.validation.presentation.R
+import com.diskin.alon.ccv.validation.presentation.model.CardType
+import com.diskin.alon.ccv.validation.presentation.model.CardValidationStatus
 import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_validation.*
@@ -43,8 +47,8 @@ class CardValidationActivity : AppCompatActivity() {
             val cardCvcNumber = savedInstanceState.getString(KEY_CARD_CVC_NUMBER)!!
             val cardExpiry = savedInstanceState.getString(KEY_CARD_EXPIRY)!!
 
-            viewModel.setCardType(cardType)
-            viewModel.setCardExpiry(cardExpiry)
+            viewModel.cardType = cardType
+            viewModel.cardExpiry = cardExpiry
 
             card_expiry_edit.setText(cardExpiry)
             // view model will be updated with restored value from this edit fields listeners
@@ -54,7 +58,7 @@ class CardValidationActivity : AppCompatActivity() {
         }
 
         // setup current card type selection using view model current value
-        when(viewModel.getCardType()) {
+        when(viewModel.cardType) {
             CardType.VISA -> radio_visa.isChecked = true
             CardType.MASTER_CARD -> radio_master_card.isChecked = true
             CardType.AMERICAN_EXPRESS -> radio_american.isChecked = true
@@ -72,7 +76,7 @@ class CardValidationActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // update view model card number
-                viewModel.setCardNumber(s.toString())
+                viewModel.cardNumber = s.toString()
             }
         })
 
@@ -88,7 +92,7 @@ class CardValidationActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // update view model cvc number
-                viewModel.setCardCvc(s.toString())
+                viewModel.cardCvc = s.toString()
             }
         })
 
@@ -109,7 +113,7 @@ class CardValidationActivity : AppCompatActivity() {
                 // update card expiry text field
                 card_expiry_edit.setText(strDate)
                 // update view model
-                viewModel.setCardExpiry(strDate)
+                viewModel.cardExpiry = strDate
             }
             .showDaySpinner(false)
             .minDate(newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), 1)
@@ -125,21 +129,21 @@ class CardValidationActivity : AppCompatActivity() {
         }
 
         // observe card validation state
-        viewModel.isCardValid().observe(this, Observer { onCardValidationUpdate(it) })
+        viewModel.isCardValid.observe(this, Observer { onCardValidationUpdate(it) })
         // observe card number validation state
-        viewModel.isCardNumberValid().observe(this, Observer { onCardNumberValidationUpdate(it) })
+        viewModel.isCardNumberValid.observe(this, Observer { onCardNumberValidationUpdate(it) })
         // observe card number validation state
-        viewModel.isCardCvcValid().observe(this, Observer { onCardCvcValidationUpdate(it) })
+        viewModel.isCardCvcValid.observe(this, Observer { onCardCvcValidationUpdate(it) })
         // observe card expiry validation state
-        viewModel.isCardExpiryValid().observe(this, Observer { onCardExpiryValidationUpdate(it) })
+        viewModel.isCardExpiryValid.observe(this, Observer { onCardExpiryValidationUpdate(it) })
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        outState?.putInt(KEY_CARD_TYPE,viewModel.getCardType().ordinal)
-        outState?.putString(KEY_CARD_NUMBER,viewModel.getCardNumber())
-        outState?.putString(KEY_CARD_CVC_NUMBER,viewModel.getCardCvc())
-        outState?.putString(KEY_CARD_EXPIRY,viewModel.getCardExpiry())
+        outState?.putInt(KEY_CARD_TYPE,viewModel.cardType.ordinal)
+        outState?.putString(KEY_CARD_NUMBER,viewModel.cardNumber)
+        outState?.putString(KEY_CARD_CVC_NUMBER,viewModel.cardCvc)
+        outState?.putString(KEY_CARD_EXPIRY,viewModel.cardExpiry)
     }
 
     /**
@@ -148,16 +152,14 @@ class CardValidationActivity : AppCompatActivity() {
     fun onCardTypeRadioButtonClicked(view: View) {
         // pass card type selection to view model
         when(view.id) {
-            R.id.radio_visa -> viewModel.setCardType(CardType.VISA)
-            R.id.radio_master_card -> viewModel.setCardType(CardType.MASTER_CARD)
-            R.id.radio_american -> viewModel.setCardType(CardType.AMERICAN_EXPRESS)
+            R.id.radio_visa -> viewModel.cardType = CardType.VISA
+            R.id.radio_master_card -> viewModel.cardType = CardType.MASTER_CARD
+            R.id.radio_american -> viewModel.cardType = CardType.AMERICAN_EXPRESS
         }
     }
 
     /**
      * Handles view model card validation state changes.
-     *
-     * @param isValid whether view model card detail are valid.
      */
     private fun onCardValidationUpdate(isValid: Boolean) {
         // change detail submit button according to validation state
@@ -166,28 +168,25 @@ class CardValidationActivity : AppCompatActivity() {
 
     /**
      * Handles view model card number validation state changes.
-     *
-     * @param isValid whether view model card number valid.
      */
-    private fun onCardNumberValidationUpdate(isValid: Boolean) {
-        card_number_edit.error = if (!isValid) getString(R.string.invalid_card_number) else null
+    private fun onCardNumberValidationUpdate(status: CardValidationStatus) {
+        // display card number status error message if invalid
+        card_number_edit.error = if (!status.isValid) status.errorMessage else null
     }
 
     /**
      * Handles view model card cvc validation state changes.
-     *
-     * @param isValid whether view model card cvc valid.
      */
-    private fun onCardCvcValidationUpdate(isValid: Boolean) {
-        card_cvc_edit.error = if (!isValid) getString(R.string.invalid_card_cvc) else null
+    private fun onCardCvcValidationUpdate(status: CardValidationStatus) {
+        // display card cvc status error message if invalid
+        card_cvc_edit.error = if (!status.isValid) status.errorMessage else null
     }
 
     /**
      * Handles view model card expiry date validation state changes.
-     *
-     * @param isValid whether view model card cvc valid.
      */
-    private fun onCardExpiryValidationUpdate(isValid: Boolean) {
-        card_expiry_edit.error = if (!isValid) getString(R.string.invalid_card_expiry) else null
+    private fun onCardExpiryValidationUpdate(status: CardValidationStatus) {
+        // display card expiry status error message if invalid
+        card_expiry_edit.error = if (!status.isValid) status.errorMessage else null
     }
 }

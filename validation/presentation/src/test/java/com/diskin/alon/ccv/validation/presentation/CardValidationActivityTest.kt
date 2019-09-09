@@ -13,6 +13,10 @@ import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.diskin.alon.ccv.validation.presentation.controller.CardValidationActivity
+import com.diskin.alon.ccv.validation.presentation.model.CardType
+import com.diskin.alon.ccv.validation.presentation.model.CardValidationStatus
+import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
 import com.nhaarman.mockitokotlin2.*
 import com.tsongkha.spinnerdatepicker.DatePicker
 import org.hamcrest.CoreMatchers.*
@@ -25,7 +29,6 @@ import javax.inject.Inject
 import com.tsongkha.spinnerdatepicker.DatePickerDialog
 import org.robolectric.shadows.ShadowDatePickerDialog
 import java.util.*
-
 
 /**
  * [CardValidationActivity] unit test class.
@@ -43,41 +46,41 @@ class CardValidationActivityTest {
 
     // Collaborators Stubs
     private val isCardValid: MutableLiveData<Boolean> = MutableLiveData()
-    private val isCardNumberValid: MutableLiveData<Boolean> = MutableLiveData()
-    private val isCardCvcValid: MutableLiveData<Boolean> = MutableLiveData()
-    private val isCardExpiryValid: MutableLiveData<Boolean> = MutableLiveData()
+    private val isCardNumberValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
+    private val isCardCvcValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
+    private val isCardExpiryValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
 
     @Before
     fun setUp() {
         // stub view model
-        whenever(viewModel.isCardValid()).doReturn(isCardValid)
-        whenever(viewModel.isCardNumberValid()).doReturn(isCardNumberValid)
-        whenever(viewModel.isCardCvcValid()).doReturn(isCardCvcValid)
-        whenever(viewModel.isCardExpiryValid()).doReturn(isCardExpiryValid)
+        whenever(viewModel.isCardValid).doReturn(isCardValid)
+        whenever(viewModel.isCardNumberValid).doReturn(isCardNumberValid)
+        whenever(viewModel.isCardCvcValid).doReturn(isCardCvcValid)
+        whenever(viewModel.isCardExpiryValid).doReturn(isCardExpiryValid)
 
         doAnswer { invocation ->
-            whenever(viewModel.getCardType()).doReturn(invocation.arguments[0] as CardType)
-        }.whenever(viewModel).setCardType(any())
+            whenever(viewModel.cardType).doReturn(invocation.arguments[0] as CardType)
+        }.whenever(viewModel).cardType = any()
 
-        viewModel.setCardType(CardType.VISA)
-
-        doAnswer { invocation ->
-            whenever(viewModel.getCardNumber()).doReturn(invocation.arguments[0] as String)
-        }.whenever(viewModel).setCardNumber(any())
-
-        viewModel.setCardNumber("")
+        viewModel.cardType =  CardType.VISA
 
         doAnswer { invocation ->
-            whenever(viewModel.getCardCvc()).doReturn(invocation.arguments[0] as String)
-        }.whenever(viewModel).setCardCvc(any())
+            whenever(viewModel.cardNumber).doReturn(invocation.arguments[0] as String)
+        }.whenever(viewModel).cardNumber = any()
 
-        viewModel.setCardCvc("")
+        viewModel.cardNumber = ""
 
         doAnswer { invocation ->
-            whenever(viewModel.getCardExpiry()).doReturn(invocation.arguments[0] as String)
-        }.whenever(viewModel).setCardExpiry(any())
+            whenever(viewModel.cardCvc).doReturn(invocation.arguments[0] as String)
+        }.whenever(viewModel).cardCvc = any()
 
-        viewModel.setCardExpiry("")
+        viewModel.cardCvc = ""
+
+        doAnswer { invocation ->
+            whenever(viewModel.cardExpiry).doReturn(invocation.arguments[0] as String)
+        }.whenever(viewModel).cardExpiry = any()
+
+        viewModel.cardExpiry = ""
 
         // launch activity under test
         scenario = ActivityScenario.launch(CardValidationActivity::class.java)
@@ -103,7 +106,7 @@ class CardValidationActivityTest {
         // Given a resumed activity with no prev state
 
         // Then activity should retrieve card type state from view model
-        verify(viewModel).getCardType()
+        verify(viewModel).cardType
 
         // And should check the card type returned by view model as current selection
         onView(withId(R.id.radio_visa))
@@ -123,9 +126,9 @@ class CardValidationActivityTest {
             .perform(click())
 
         // Then activity should pass selection to view model
-        verify(viewModel, times(2)).setCardType(eq(CardType.VISA))
-        verify(viewModel).setCardType(eq(CardType.MASTER_CARD))
-        verify(viewModel).setCardType(eq(CardType.AMERICAN_EXPRESS))
+        verify(viewModel, times(2)).cardType = eq(CardType.VISA)
+        verify(viewModel).cardType = eq(CardType.MASTER_CARD)
+        verify(viewModel).cardType = eq(CardType.AMERICAN_EXPRESS)
     }
 
     @Test
@@ -148,7 +151,7 @@ class CardValidationActivityTest {
             .check(matches(isChecked()))
 
         // And pass restored type to view model
-        verify(viewModel, times(2)).setCardType(eq(CardType.MASTER_CARD))
+        verify(viewModel, times(2)).cardType = eq(CardType.MASTER_CARD)
     }
 
     @Test
@@ -156,7 +159,7 @@ class CardValidationActivityTest {
         // Given a resumed activity
 
         // Then activity should observe view model card validation state
-        verify(viewModel).isCardValid()
+        verify(viewModel).isCardValid
 
         // When validation state updates to invalid
         isCardValid.value = false
@@ -191,9 +194,9 @@ class CardValidationActivityTest {
             .perform(typeText("123"))
 
         // Then activity should send number text changes to view model
-        verify(viewModel).setCardNumber(eq("1"))
-        verify(viewModel).setCardNumber(eq("12"))
-        verify(viewModel).setCardNumber(eq("123"))
+        verify(viewModel).cardNumber = eq("1")
+        verify(viewModel).cardNumber = eq("12")
+        verify(viewModel).cardNumber = eq("123")
     }
 
     @Test
@@ -213,27 +216,26 @@ class CardValidationActivityTest {
             .check(matches(isDisplayed()))
 
         // And should pass restored value to view model
-        verify(viewModel, times(2)).setCardNumber(eq(cardNumber))
+        verify(viewModel, times(2)).cardNumber = eq(cardNumber)
     }
 
     @Test
     fun shouldObserveViewModelCardNumberValidationState() {
         // Given a resumed activity
-        val errorMessage = ApplicationProvider.getApplicationContext<Context>()
-            .getString(R.string.invalid_card_number)
+        val errorMessage = "error message"
 
         // Then activity should observe view model card number validation state
-        verify(viewModel).isCardNumberValid()
+        verify(viewModel).isCardNumberValid
 
         // When card number updates to invalid
-        isCardNumberValid.value = false
+        isCardNumberValid.value = CardValidationStatus.invalid(errorMessage)
 
         // Then activity should display an error indicator in card number edit field
         onView(withId(R.id.card_number_edit))
                 .check(matches(hasErrorText(errorMessage)))
 
         // When card number updates to valid
-        isCardNumberValid.value = true
+        isCardNumberValid.value = CardValidationStatus.valid()
 
         // Then activity should remove error indicator from card number edit field
         onView(withId(R.id.card_number_edit))
@@ -258,9 +260,9 @@ class CardValidationActivityTest {
             .perform(typeText("123"))
 
         // Then activity should send number text changes to view model
-        verify(viewModel).setCardCvc(eq("1"))
-        verify(viewModel).setCardCvc(eq("12"))
-        verify(viewModel).setCardCvc(eq("123"))
+        verify(viewModel).cardCvc = eq("1")
+        verify(viewModel).cardCvc = eq("12")
+        verify(viewModel).cardCvc = eq("123")
     }
 
     @Test
@@ -272,11 +274,11 @@ class CardValidationActivityTest {
             .perform(typeText("12345"))
 
         // Then activity should send number text changes to view model limited by 4 digit input
-        verify(viewModel).setCardCvc(eq("1"))
-        verify(viewModel).setCardCvc(eq("12"))
-        verify(viewModel).setCardCvc(eq("123"))
-        verify(viewModel).setCardCvc(eq("1234"))
-        verify(viewModel, times(0)).setCardCvc(eq("12345"))
+        verify(viewModel).cardCvc = eq("1")
+        verify(viewModel).cardCvc = eq("12")
+        verify(viewModel).cardCvc = eq("123")
+        verify(viewModel).cardCvc = eq("1234")
+        verify(viewModel, times(0)).cardCvc = eq("12345")
     }
 
     @Test
@@ -296,27 +298,26 @@ class CardValidationActivityTest {
             .check(matches(isDisplayed()))
 
         // And should pass restored value to view model
-        verify(viewModel, times(2)).setCardCvc(eq(cardCvcNumber))
+        verify(viewModel, times(2)).cardCvc = eq(cardCvcNumber)
     }
 
     @Test
     fun shouldObserveViewModelCardCvcValidationState() {
         // Given a resumed activity
-        val errorMessage = ApplicationProvider.getApplicationContext<Context>()
-            .getString(R.string.invalid_card_cvc)
+        val errorMessage = "error message"
 
         // Then activity should observe view model card number validation state
-        verify(viewModel).isCardCvcValid()
+        verify(viewModel).isCardCvcValid
 
         // When card cvc updates to invalid
-        isCardCvcValid.value = false
+        isCardCvcValid.value = CardValidationStatus.invalid(errorMessage)
 
         // Then activity should display an error indicator in card cvc edit field
         onView(withId(R.id.card_cvc_edit))
             .check(matches(hasErrorText(errorMessage)))
 
         // When card number updates to valid
-        isCardCvcValid.value = true
+        isCardCvcValid.value = CardValidationStatus.valid()
 
         // Then activity should remove error indicator from card number edit field
         onView(withId(R.id.card_cvc_edit))
@@ -390,7 +391,7 @@ class CardValidationActivityTest {
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
 
         // Then activity should update view model with selected date
-        verify(viewModel).setCardExpiry(eq("01/20"))
+        verify(viewModel).cardExpiry = eq("01/20")
     }
 
     @Test
@@ -420,27 +421,26 @@ class CardValidationActivityTest {
             .check(matches(allOf(withText("01/20"), isDisplayed())))
 
         // And restore view model card expiry state
-        verify(viewModel, times(2)).setCardExpiry(eq("01/20"))
+        verify(viewModel, times(2)).cardExpiry = eq("01/20")
     }
 
     @Test
     fun shouldObserveCardExpiryViewModelValidationState() {
         // Given a resumed activity
-        val errorMessage = ApplicationProvider.getApplicationContext<Context>()
-            .getString(R.string.invalid_card_expiry)
+        val errorMessage = "error message"
 
         // Then activity should observe view model card expiry state
-        verify(viewModel).isCardExpiryValid()
+        verify(viewModel).isCardExpiryValid
 
         // When card expiry validation is updated to invalid
-        isCardExpiryValid.value = false
+        isCardExpiryValid.value = CardValidationStatus.invalid(errorMessage)
 
         // Then activity should display error message in expiry text field
         onView(withId(R.id.card_expiry_edit))
             .check(matches(hasErrorText(errorMessage)))
 
         // When card expiry validation is updated to valid
-        isCardExpiryValid.value = true
+        isCardExpiryValid.value = CardValidationStatus.valid()
 
         // Then activity should remove error message in expiry text field
         onView(withId(R.id.card_expiry_edit))

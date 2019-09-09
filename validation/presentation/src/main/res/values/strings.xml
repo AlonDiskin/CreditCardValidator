@@ -16,4 +16,5 @@
     <string name="invalid_card_number">Invalid card number!</string>
     <string name="invalid_card_cvc">Invalid card cvc!</string>
     <string name="invalid_card_expiry">Invalid card expiry date!</string>
+    <string name="empty_card_detail_error">field cannot be blank</string>
 </resources>
