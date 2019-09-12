@@ -50,9 +50,9 @@ class CardValidationViewModelImplTest {
     lateinit var serviceExecutor: ServiceExecutor
 
     // Collaborator Stubs
-    private val cardNumberValidationStatusSubject: BehaviorSubject<CardValidationStatus> = BehaviorSubject.create()
-    private val cardCvcValidationStatusSubject: BehaviorSubject<CardValidationStatus> = BehaviorSubject.create()
-    private val cardExpiryValidationStatusSubject: BehaviorSubject<CardValidationStatus> = BehaviorSubject.create()
+    private val cardNumberValidationStatusSubject: BehaviorSubject<CardDetailValidationStatus> = BehaviorSubject.create()
+    private val cardCvcValidationStatusSubject: BehaviorSubject<CardDetailValidationStatus> = BehaviorSubject.create()
+    private val cardExpiryValidationStatusSubject: BehaviorSubject<CardDetailValidationStatus> = BehaviorSubject.create()
 
     @Before
     fun setUp() {
@@ -111,7 +111,7 @@ class CardValidationViewModelImplTest {
 
     @Test
     @Parameters(method = "cardNumberValidationParams")
-    fun shouldValidateCardNumber_whenCardNumberUpdated(numberUpdate: String, validationStatus: CardValidationStatus) {
+    fun shouldValidateCardNumber_whenCardNumberUpdated(numberUpdate: String, validationStatus: CardDetailValidationStatus) {
         // Given an initialized view model
         val expectedEmptyInvocations = 2
 
@@ -136,7 +136,7 @@ class CardValidationViewModelImplTest {
 
     @Test
     @Parameters(method = "cardCvcValidationParams")
-    fun shouldValidateCardCvc_whenCardCvcUpdated(cvcUpdate: String, validationStatus: CardValidationStatus) {
+    fun shouldValidateCardCvc_whenCardCvcUpdated(cvcUpdate: String, validationStatus: CardDetailValidationStatus) {
         // Given an initialized view model
         val expectedEmptyInvocations = 2
 
@@ -161,7 +161,7 @@ class CardValidationViewModelImplTest {
 
     @Test
     @Parameters(method = "cardExpiryValidationParams")
-    fun shouldValidateCardExpiry_whenCardCvcUpdated(expiryUpdate: String, validationStatus: CardValidationStatus) {
+    fun shouldValidateCardExpiry_whenCardCvcUpdated(expiryUpdate: String, validationStatus: CardDetailValidationStatus) {
         // Given an initialized view model
         val expectedEmptyInvocations = 2
 
@@ -184,21 +184,60 @@ class CardValidationViewModelImplTest {
         assertThat(viewModel.isCardExpiryValid.value).isEqualTo(validationStatus)
     }
 
+    @Test
+    @Parameters(method = "cardValidationParams")
+    fun shouldValidateCard_whenCardDetailValidationUpdates(number: String,
+                                                           numberStatus: CardDetailValidationStatus,
+                                                           cvc: String,
+                                                           cvcStatus: CardDetailValidationStatus,
+                                                           expiry: String,
+                                                           expiryStatus: CardDetailValidationStatus,
+                                                           validation: Boolean) {
+        // Given an initialized view model
+
+        // When view updates view model card detail
+        viewModel.cardNumber = number
+        cardNumberValidationStatusSubject.onNext(numberStatus)
+        viewModel.cardCvc = cvc
+        cardCvcValidationStatusSubject.onNext(cvcStatus)
+        viewModel.cardExpiry = expiry
+        cardExpiryValidationStatusSubject.onNext(expiryStatus)
+
+        // Then view model should validate card
+        assertThat(viewModel.isCardValid.value).isEqualTo(validation)
+    }
+
     fun cardDetailParams() = arrayOf(arrayOf(CardType.VISA,"123445","345","12/20"),
         arrayOf(CardType.MASTER_CARD,"123456745","4356345","10/20"))
 
-    fun cardNumberValidationParams() = arrayOf(arrayOf("123445",CardValidationStatus.valid()),
-        arrayOf("",CardValidationStatus.invalid("number validation error message")),
-        arrayOf("1",CardValidationStatus.valid()),
-        arrayOf("654",CardValidationStatus.invalid("validation error message")))
+    fun cardNumberValidationParams() = arrayOf(arrayOf("123445",CardDetailValidationStatus.valid()),
+        arrayOf("",CardDetailValidationStatus.invalid("number validation error message")),
+        arrayOf("1",CardDetailValidationStatus.valid()),
+        arrayOf("654",CardDetailValidationStatus.invalid("validation error message")))
 
-    fun cardCvcValidationParams() = arrayOf(arrayOf("125",CardValidationStatus.valid()),
-        arrayOf("09876",CardValidationStatus.invalid("message")),
-        arrayOf("",CardValidationStatus.invalid("cvc validation error message")),
-        arrayOf("15959",CardValidationStatus.valid()))
+    fun cardCvcValidationParams() = arrayOf(arrayOf("125",CardDetailValidationStatus.valid()),
+        arrayOf("09876",CardDetailValidationStatus.invalid("message")),
+        arrayOf("",CardDetailValidationStatus.invalid("cvc validation error message")),
+        arrayOf("15959",CardDetailValidationStatus.valid()))
 
-    fun cardExpiryValidationParams() = arrayOf(arrayOf("12/24",CardValidationStatus.valid()),
-        arrayOf("09876",CardValidationStatus.invalid("message")),
-        arrayOf("",CardValidationStatus.invalid("cvc validation error message")),
-        arrayOf("15/59",CardValidationStatus.valid()))
+    fun cardExpiryValidationParams() = arrayOf(arrayOf("12/24",CardDetailValidationStatus.valid()),
+        arrayOf("09876",CardDetailValidationStatus.invalid("message")),
+        arrayOf("",CardDetailValidationStatus.invalid("cvc validation error message")),
+        arrayOf("15/59",CardDetailValidationStatus.valid()))
+
+    fun cardValidationParams() = arrayOf(
+        arrayOf("",
+            CardDetailValidationStatus.invalid("message"),
+            "",
+            CardDetailValidationStatus.invalid("error"),
+            "12/30",
+            CardDetailValidationStatus.valid(),
+            false),
+        arrayOf("123",
+            CardDetailValidationStatus.valid(),
+            "",
+            CardDetailValidationStatus.valid(),
+            "12/30",
+            CardDetailValidationStatus.valid(),
+            true))
 }

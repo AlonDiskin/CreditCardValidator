@@ -15,7 +15,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.diskin.alon.ccv.validation.presentation.controller.CardValidationActivity
 import com.diskin.alon.ccv.validation.presentation.model.CardType
-import com.diskin.alon.ccv.validation.presentation.model.CardValidationStatus
+import com.diskin.alon.ccv.validation.presentation.model.CardDetailValidationStatus
 import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
 import com.nhaarman.mockitokotlin2.*
 import com.tsongkha.spinnerdatepicker.DatePicker
@@ -46,9 +46,9 @@ class CardValidationActivityTest {
 
     // Collaborators Stubs
     private val isCardValid: MutableLiveData<Boolean> = MutableLiveData()
-    private val isCardNumberValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
-    private val isCardCvcValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
-    private val isCardExpiryValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
+    private val isCardNumberValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
+    private val isCardCvcValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
+    private val isCardExpiryValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
 
     @Before
     fun setUp() {
@@ -228,14 +228,14 @@ class CardValidationActivityTest {
         verify(viewModel).isCardNumberValid
 
         // When card number updates to invalid
-        isCardNumberValid.value = CardValidationStatus.invalid(errorMessage)
+        isCardNumberValid.value = CardDetailValidationStatus.invalid(errorMessage)
 
         // Then activity should display an error indicator in card number edit field
         onView(withId(R.id.card_number_edit))
                 .check(matches(hasErrorText(errorMessage)))
 
         // When card number updates to valid
-        isCardNumberValid.value = CardValidationStatus.valid()
+        isCardNumberValid.value = CardDetailValidationStatus.valid()
 
         // Then activity should remove error indicator from card number edit field
         onView(withId(R.id.card_number_edit))
@@ -310,14 +310,14 @@ class CardValidationActivityTest {
         verify(viewModel).isCardCvcValid
 
         // When card cvc updates to invalid
-        isCardCvcValid.value = CardValidationStatus.invalid(errorMessage)
+        isCardCvcValid.value = CardDetailValidationStatus.invalid(errorMessage)
 
         // Then activity should display an error indicator in card cvc edit field
         onView(withId(R.id.card_cvc_edit))
             .check(matches(hasErrorText(errorMessage)))
 
         // When card number updates to valid
-        isCardCvcValid.value = CardValidationStatus.valid()
+        isCardCvcValid.value = CardDetailValidationStatus.valid()
 
         // Then activity should remove error indicator from card number edit field
         onView(withId(R.id.card_cvc_edit))
@@ -433,14 +433,14 @@ class CardValidationActivityTest {
         verify(viewModel).isCardExpiryValid
 
         // When card expiry validation is updated to invalid
-        isCardExpiryValid.value = CardValidationStatus.invalid(errorMessage)
+        isCardExpiryValid.value = CardDetailValidationStatus.invalid(errorMessage)
 
         // Then activity should display error message in expiry text field
         onView(withId(R.id.card_expiry_edit))
             .check(matches(hasErrorText(errorMessage)))
 
         // When card expiry validation is updated to valid
-        isCardExpiryValid.value = CardValidationStatus.valid()
+        isCardExpiryValid.value = CardDetailValidationStatus.valid()
 
         // Then activity should remove error message in expiry text field
         onView(withId(R.id.card_expiry_edit))

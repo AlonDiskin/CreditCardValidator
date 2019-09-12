@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
 import com.diskin.alon.ccv.validation.presentation.R
 import com.diskin.alon.ccv.validation.presentation.model.CardType
-import com.diskin.alon.ccv.validation.presentation.model.CardValidationStatus
+import com.diskin.alon.ccv.validation.presentation.model.CardDetailValidationStatus
 import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_validation.*
@@ -169,7 +169,7 @@ class CardValidationActivity : AppCompatActivity() {
     /**
      * Handles view model card number validation state changes.
      */
-    private fun onCardNumberValidationUpdate(status: CardValidationStatus) {
+    private fun onCardNumberValidationUpdate(status: CardDetailValidationStatus) {
         // display card number status error message if invalid
         card_number_edit.error = if (!status.isValid) status.errorMessage else null
     }
@@ -177,7 +177,7 @@ class CardValidationActivity : AppCompatActivity() {
     /**
      * Handles view model card cvc validation state changes.
      */
-    private fun onCardCvcValidationUpdate(status: CardValidationStatus) {
+    private fun onCardCvcValidationUpdate(status: CardDetailValidationStatus) {
         // display card cvc status error message if invalid
         card_cvc_edit.error = if (!status.isValid) status.errorMessage else null
     }
@@ -185,7 +185,7 @@ class CardValidationActivity : AppCompatActivity() {
     /**
      * Handles view model card expiry date validation state changes.
      */
-    private fun onCardExpiryValidationUpdate(status: CardValidationStatus) {
+    private fun onCardExpiryValidationUpdate(status: CardDetailValidationStatus) {
         // display card expiry status error message if invalid
         card_expiry_edit.error = if (!status.isValid) status.errorMessage else null
     }

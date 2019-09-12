@@ -2,7 +2,7 @@ package com.diskin.alon.ccv.validation.presentation.viewmodel
 
 import androidx.lifecycle.LiveData
 import com.diskin.alon.ccv.validation.presentation.model.CardType
-import com.diskin.alon.ccv.validation.presentation.model.CardValidationStatus
+import com.diskin.alon.ccv.validation.presentation.model.CardDetailValidationStatus
 
 /**
  * Card validation screen view model contract.
@@ -41,19 +41,19 @@ interface CardValidationViewModel {
      *
      * @return [LiveData] containing number validation status data.
      */
-    val isCardNumberValid: LiveData<CardValidationStatus>
+    val isCardNumberValid: LiveData<CardDetailValidationStatus>
 
     /**
      * Credit card cvc validation status.
      *
      * @return [LiveData] containing card cvc validation status data.
      */
-    val isCardCvcValid: LiveData<CardValidationStatus>
+    val isCardCvcValid: LiveData<CardDetailValidationStatus>
 
     /**
      * Credit card expiry date validation status.
      *
      * @return [LiveData] containing card expiry validation status data.
      */
-    val isCardExpiryValid: LiveData<CardValidationStatus>
+    val isCardExpiryValid: LiveData<CardDetailValidationStatus>
 }

@@ -1,2 +1,2 @@
-include ':app', ':validation:presentation'
+include ':app', ':validation:presentation', ':validation:domain'
 rootProject.name='CreditCardValidator'

@@ -45,17 +45,18 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
         get() = _cardExpiry.value!! // throw exception if backing property wasn't initialized with default value
         set(value) {_cardExpiry.onNext(value)}
 
+    private val _isCardNumberValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
+    override val isCardNumberValid: LiveData<CardDetailValidationStatus> = _isCardNumberValid
+
+    private val _isCardCvcValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
+    override val isCardCvcValid: LiveData<CardDetailValidationStatus> = _isCardCvcValid
+
+    private val _isCardExpiryValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
+    override val isCardExpiryValid: LiveData<CardDetailValidationStatus> = _isCardExpiryValid
+
     private val _isCardValid: MutableLiveData<Boolean> = MutableLiveData()
     override val isCardValid: LiveData<Boolean> = _isCardValid
 
-    private val _isCardNumberValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
-    override val isCardNumberValid: LiveData<CardValidationStatus> = _isCardNumberValid
-
-    private val _isCardCvcValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
-    override val isCardCvcValid: LiveData<CardValidationStatus> = _isCardCvcValid
-
-    private val _isCardExpiryValid: MutableLiveData<CardValidationStatus> = MutableLiveData()
-    override val isCardExpiryValid: LiveData<CardValidationStatus> = _isCardExpiryValid
     private val compositeDisposable = CompositeDisposable()
 
     init {
@@ -73,6 +74,10 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
         }
     }
 
+    /**
+     * Subscribes view model to an observable that update the validation status of card number, whenever
+     * the number and card type properties are changed.
+     */
     private fun subscribeCardNumberObservable() =
         Observable.combineLatest<CardType, String, CardNumberValidationRequest>(
             _cardType,
@@ -80,8 +85,15 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
             BiFunction { type, number -> CardNumberValidationRequest(type, number) })
             .switchMap { request -> serviceExecutor.execute(request) }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe ({ status -> _isCardNumberValid.value = status}, {it.printStackTrace()})
+            .subscribe ({ status ->
+                _isCardNumberValid.value = status
+                updateCardValidation() },
+                { it.printStackTrace() })
 
+    /**
+     * Subscribes view model to an observable that update the validation status of card cvc, whenever
+     * the cvc number and card type properties are changed.
+     */
     private fun subscribeCardCvcObservable() =
         Observable.combineLatest<CardType, String, CardCvcValidationRequest>(
             _cardType,
@@ -89,11 +101,35 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
             BiFunction { type, cvc -> CardCvcValidationRequest(type, cvc) })
             .switchMap { request -> serviceExecutor.execute(request) }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe ({ status -> _isCardCvcValid.value = status}, {it.printStackTrace()})
+            .subscribe ({ status ->
+                _isCardCvcValid.value = status
+                updateCardValidation() },
+                { it.printStackTrace() })
 
+    /**
+     * Subscribes view model to an observable that update the validation status of card expiry, whenever
+     * the expiry date property is changed.
+     */
     private fun subscribeCardExpiryObservable() =
         _cardExpiry
             .switchMap { expiry -> serviceExecutor.execute(CardExpiryValidationRequest(expiry)) }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe ({ status -> _isCardExpiryValid.value = status}, {it.printStackTrace()})
+            .subscribe ({ status ->
+                _isCardExpiryValid.value = status
+                updateCardValidation() },
+                { it.printStackTrace() })
+
+    /**
+     * Determines if card is valid by checking the validation status of all card details, such
+     * as number,cvc number, and expiry date/
+     */
+    private fun updateCardValidation() {
+        val isNumberValid = _isCardNumberValid.value?.isValid
+        val isCvcValid = _isCardCvcValid.value?.isValid
+        val isExpiryValid = _isCardExpiryValid.value?.isValid
+
+        _isCardValid.value = (isNumberValid ?: false)
+                && (isCvcValid ?: false)
+                && (isExpiryValid ?: false)
+    }
 }
