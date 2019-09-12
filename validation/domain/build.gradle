@@ -1,7 +1,14 @@
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    // testing
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.google.truth:truth:1.0'
+    testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
 }
 
 sourceCompatibility = "8"
