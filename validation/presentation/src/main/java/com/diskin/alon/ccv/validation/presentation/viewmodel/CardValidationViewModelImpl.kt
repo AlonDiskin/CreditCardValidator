@@ -124,12 +124,8 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
      * as number,cvc number, and expiry date/
      */
     private fun updateCardValidation() {
-        val isNumberValid = _isCardNumberValid.value?.isValid
-        val isCvcValid = _isCardCvcValid.value?.isValid
-        val isExpiryValid = _isCardExpiryValid.value?.isValid
-
-        _isCardValid.value = (isNumberValid ?: false)
-                && (isCvcValid ?: false)
-                && (isExpiryValid ?: false)
+        _isCardValid.value = _isCardNumberValid.value?.isValid ?: false
+                && _isCardCvcValid.value?.isValid ?: false
+                && _isCardExpiryValid.value?.isValid ?: false
     }
 }
