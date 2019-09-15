@@ -1,9 +1,7 @@
 package com.diskin.alon.ccv.validation.domain
 
 import com.diskin.alon.ccv.validation.domain.CardType.*
-import java.time.LocalDate
-import java.time.Month
-import java.time.Year
+import java.util.*
 import java.util.regex.Pattern
 
 /**
@@ -56,12 +54,17 @@ fun validateCardNumber(number: String, type: CardType) =
 /**
  * Validates card expiry date.
  *
- * @param month expiry mont.
- * @param year expiry year.
+ * @param calendar calendar representation of card expiry. Given instance must set its day of month
+ * to '1'.
  * @return true if card is not expired, false otherwise
  */
-fun validateCardExpiry(month: Month, year: Year) =
-     LocalDate.of(year.value,month.value,1) >= LocalDate.now()
+fun validateCardExpiry(calendar: Calendar) =
+    if (calendar.get(Calendar.DAY_OF_MONTH) == 1) {
+        calendar >= Calendar.getInstance()
+
+    } else {
+        false
+    }
 
 private fun numberToDigits(number: String): IntArray {
     val charArray = number.toCharArray()

@@ -83,7 +83,7 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
             _cardType,
             _cardNumber,
             BiFunction { type, number -> CardNumberValidationRequest(type, number) })
-            .switchMap { request -> serviceExecutor.execute(request) }
+            .switchMapSingle { request -> serviceExecutor.execute(request) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ status ->
                 _isCardNumberValid.value = status
@@ -99,7 +99,7 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
             _cardType,
             _cardCvc,
             BiFunction { type, cvc -> CardCvcValidationRequest(type, cvc) })
-            .switchMap { request -> serviceExecutor.execute(request) }
+            .switchMapSingle { request -> serviceExecutor.execute(request) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ status ->
                 _isCardCvcValid.value = status
@@ -112,7 +112,7 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
      */
     private fun subscribeCardExpiryObservable() =
         _cardExpiry
-            .switchMap { expiry -> serviceExecutor.execute(CardExpiryValidationRequest(expiry)) }
+            .switchMapSingle { expiry -> serviceExecutor.execute(CardExpiryValidationRequest(expiry)) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ status ->
                 _isCardExpiryValid.value = status

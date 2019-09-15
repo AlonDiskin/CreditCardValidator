@@ -1,7 +1,7 @@
 package com.diskin.alon.ccv.validation.presentation.model
 
 import com.diskin.alon.ccv.validation.presentation.util.ServiceRequest
-import io.reactivex.Observable
+import io.reactivex.Single
 
 data class CardExpiryValidationRequest(val expiry: String) :
-    ServiceRequest<String, Observable<CardDetailValidationStatus>>(expiry)
+    ServiceRequest<String, Single<CardDetailValidationStatus>>(expiry)

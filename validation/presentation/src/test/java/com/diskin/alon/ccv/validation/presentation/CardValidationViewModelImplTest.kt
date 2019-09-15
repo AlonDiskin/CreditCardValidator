@@ -11,6 +11,7 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.SingleSubject
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.junit.Before
@@ -50,9 +51,9 @@ class CardValidationViewModelImplTest {
     lateinit var serviceExecutor: ServiceExecutor
 
     // Collaborator Stubs
-    private val cardNumberValidationStatusSubject: BehaviorSubject<CardDetailValidationStatus> = BehaviorSubject.create()
-    private val cardCvcValidationStatusSubject: BehaviorSubject<CardDetailValidationStatus> = BehaviorSubject.create()
-    private val cardExpiryValidationStatusSubject: BehaviorSubject<CardDetailValidationStatus> = BehaviorSubject.create()
+    private val cardNumberValidationStatusSubject: SingleSubject<CardDetailValidationStatus> = SingleSubject.create()
+    private val cardCvcValidationStatusSubject: SingleSubject<CardDetailValidationStatus> = SingleSubject.create()
+    private val cardExpiryValidationStatusSubject: SingleSubject<CardDetailValidationStatus> = SingleSubject.create()
 
     @Before
     fun setUp() {
@@ -128,7 +129,7 @@ class CardValidationViewModelImplTest {
         }
 
         // When service executor return result
-        cardNumberValidationStatusSubject.onNext(validationStatus)
+        cardNumberValidationStatusSubject.onSuccess(validationStatus)
 
         // And update execution result to number validation state view observer
         assertThat(viewModel.isCardNumberValid.value).isEqualTo(validationStatus)
@@ -153,7 +154,7 @@ class CardValidationViewModelImplTest {
         }
 
         // When service executor return result
-        cardCvcValidationStatusSubject.onNext(validationStatus)
+        cardCvcValidationStatusSubject.onSuccess(validationStatus)
 
         // And update execution result to card cvc validation state view observer
         assertThat(viewModel.isCardCvcValid.value).isEqualTo(validationStatus)
@@ -178,7 +179,7 @@ class CardValidationViewModelImplTest {
         }
 
         // When service executor return result
-        cardExpiryValidationStatusSubject.onNext(validationStatus)
+        cardExpiryValidationStatusSubject.onSuccess(validationStatus)
 
         // And update execution result to expiry validation state view observer
         assertThat(viewModel.isCardExpiryValid.value).isEqualTo(validationStatus)
@@ -197,11 +198,11 @@ class CardValidationViewModelImplTest {
 
         // When view updates view model card detail
         viewModel.cardNumber = number
-        cardNumberValidationStatusSubject.onNext(numberStatus)
+        cardNumberValidationStatusSubject.onSuccess(numberStatus)
         viewModel.cardCvc = cvc
-        cardCvcValidationStatusSubject.onNext(cvcStatus)
+        cardCvcValidationStatusSubject.onSuccess(cvcStatus)
         viewModel.cardExpiry = expiry
-        cardExpiryValidationStatusSubject.onNext(expiryStatus)
+        cardExpiryValidationStatusSubject.onSuccess(expiryStatus)
 
         // Then view model should validate card
         assertThat(viewModel.isCardValid.value).isEqualTo(validation)

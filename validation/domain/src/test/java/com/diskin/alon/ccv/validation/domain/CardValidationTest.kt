@@ -5,9 +5,7 @@ import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.LocalDate
-import java.time.Month
-import java.time.Year
+import java.util.*
 
 @RunWith(JUnitParamsRunner::class)
 class CardValidationTest {
@@ -26,8 +24,8 @@ class CardValidationTest {
 
     @Test
     @Parameters(method = "cardExpiryValidationParams")
-    fun shouldValidateCardExpiryDate(month: Month, year: Year, isValid: Boolean) {
-        assertThat(validateCardExpiry(month, year)).isEqualTo(isValid)
+    fun shouldValidateCardExpiryDate(calendar: Calendar, isValid: Boolean) {
+        assertThat(validateCardExpiry(calendar)).isEqualTo(isValid)
     }
 
     fun cardCvcValidationParams() = arrayOf(
@@ -62,9 +60,49 @@ class CardValidationTest {
         arrayOf("171449635398431", CardType.AMERICAN_EXPRESS, false))
 
     fun cardExpiryValidationParams() = arrayOf(
-        arrayOf(LocalDate.now().month, Year.of(LocalDate.now().year), LocalDate.now().dayOfMonth == 1),
-        arrayOf(LocalDate.now().month, Year.of(LocalDate.now().plusYears(1).year),true),
-        arrayOf(LocalDate.now().plusMonths(5).month, Year.of(LocalDate.now().plusMonths(5).year),true),
-        arrayOf(LocalDate.now().month, Year.of(LocalDate.now().minusYears(1).year),false),
-        arrayOf(LocalDate.now().minusMonths(1).month, Year.of(LocalDate.now().year),false))
+        arrayOf(Calendar.getInstance(),Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1),
+        arrayOf(getUnExpired1(),true),
+        arrayOf(getUnExpired2(),true),
+        arrayOf(getExpired(),false),
+        arrayOf(getExpired2(),false),
+        arrayOf(getIncorrectDate(),false))
+
+    private fun getUnExpired1(): Calendar {
+        val calendar = Calendar.getInstance()
+
+        calendar.set(Calendar.DAY_OF_MONTH,1)
+        calendar.add(Calendar.MONTH,1)
+        return calendar
+    }
+
+    private fun getUnExpired2(): Calendar {
+        val calendar = Calendar.getInstance()
+
+        calendar.set(Calendar.DAY_OF_MONTH,1)
+        calendar.add(Calendar.YEAR,1)
+        return calendar
+    }
+
+    private fun getExpired(): Calendar {
+        val calendar = Calendar.getInstance()
+
+        calendar.set(Calendar.DAY_OF_MONTH,1)
+        calendar.add(Calendar.MONTH,-2)
+        return calendar
+    }
+
+    private fun getExpired2(): Calendar {
+        val calendar = Calendar.getInstance()
+
+        calendar.set(Calendar.DAY_OF_MONTH,1)
+        calendar.add(Calendar.YEAR,-2)
+        return calendar
+    }
+
+    private fun getIncorrectDate(): Calendar {
+        val calendar = Calendar.getInstance()
+
+        calendar.set(Calendar.DAY_OF_MONTH,5)
+        return calendar
+    }
 }

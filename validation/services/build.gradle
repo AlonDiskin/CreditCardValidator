@@ -1,0 +1,23 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':validation:domain')
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    // Rx
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
+    implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+
+    // testing
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.google.truth:truth:1.0'
+    testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
+    testImplementation "io.mockk:mockk:1.9.3.kotlin12"
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
