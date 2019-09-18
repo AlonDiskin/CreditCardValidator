@@ -7,13 +7,13 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
 import com.diskin.alon.ccv.validation.presentation.R
 import com.diskin.alon.ccv.validation.presentation.model.CardType
-import com.diskin.alon.ccv.validation.presentation.model.CardDetailValidationStatus
+import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
 import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_validation.*
+import kotlinx.android.synthetic.main.content_validation.*
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -43,86 +43,92 @@ class CardValidationActivity : AppCompatActivity() {
         // restore saved state if exist
         if (savedInstanceState != null) {
             val cardType = CardType.values()[savedInstanceState.getInt(KEY_CARD_TYPE)]
-            val cardNumber = savedInstanceState.getString(KEY_CARD_NUMBER)!!
-            val cardCvcNumber = savedInstanceState.getString(KEY_CARD_CVC_NUMBER)!!
-            val cardExpiry = savedInstanceState.getString(KEY_CARD_EXPIRY)!!
+            val cardNumber: String? = savedInstanceState.getString(KEY_CARD_NUMBER)
+            val cardCvcNumber: String? = savedInstanceState.getString(KEY_CARD_CVC_NUMBER)
+            val cardExpiry: Calendar? = (savedInstanceState.getSerializable(KEY_CARD_EXPIRY) as Calendar?)
 
-            viewModel.cardType = cardType
-            viewModel.cardExpiry = cardExpiry
+            viewModel.cardType.onNext(cardType)
 
-            card_expiry_edit.setText(cardExpiry)
-            // view model will be updated with restored value from this edit fields listeners
-            // upon adding them
-            card_number_edit.setText(cardNumber)
-            card_cvc_edit.setText(cardCvcNumber)
-        }
+            when(cardType) {
+                CardType.VISA -> radio_visa.isChecked = true
+                CardType.MASTER_CARD -> radio_master_card.isChecked = true
+                CardType.AMERICAN_EXPRESS -> radio_american.isChecked = true
+            }
 
-        // setup current card type selection using view model current value
-        when(viewModel.cardType) {
-            CardType.VISA -> radio_visa.isChecked = true
-            CardType.MASTER_CARD -> radio_master_card.isChecked = true
-            CardType.AMERICAN_EXPRESS -> radio_american.isChecked = true
+            if (cardNumber != null) {
+                // view model number property will be updated when text listener be added
+                card_number_input_edit.setText(cardNumber)
+            }
+
+            if (cardCvcNumber != null) {
+                // view model cvc code property will be updated when text listener be added
+                card_cvc_input_edit.setText(cardCvcNumber)
+            }
+
+            if (cardExpiry != null) {
+                viewModel.cardExpiry.onNext(cardExpiry)
+                card_expiry_input_edit.setText(formatCalendar(cardExpiry))
+            }
+
+        } else{
+            // set current card type selection state as 'Visa'
+            viewModel.cardType.onNext(CardType.VISA)
+            radio_visa.isChecked = true
         }
 
         // setup card number text input listener
-        card_number_edit.addTextChangedListener(object : TextWatcher {
+        card_number_input_edit.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
 
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // update view model card number
-                viewModel.cardNumber = s.toString()
+                viewModel.cardNumber.onNext(s.toString())
             }
         })
 
         // setup card cvc number text input listener
-        card_cvc_edit.addTextChangedListener(object : TextWatcher {
+        card_cvc_input_edit.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
 
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // update view model cvc number
-                viewModel.cardCvc = s.toString()
+                viewModel.cardCvc.onNext(s.toString())
             }
         })
 
         // setup card expiry date field listeners
-        card_expiry_edit.inputType = InputType.TYPE_NULL
+        card_expiry_input_edit.inputType = InputType.TYPE_NULL
         val newCalendar = Calendar.getInstance()
         val datePickerDialog = SpinnerDatePickerDialogBuilder()
             .context(this)
             .callback { view, year, monthOfYear, dayOfMonth ->
                 // compose selected date as calendar instance
                 val calendar = Calendar.getInstance()
-                calendar.set(year,monthOfYear,dayOfMonth)
-
-                // format date for ui
-                val dateFormat = SimpleDateFormat("MM/YY")
-                val strDate = dateFormat.format(calendar.time)
+                calendar.set(year,monthOfYear,1)
 
                 // update card expiry text field
-                card_expiry_edit.setText(strDate)
+                card_expiry_input_edit.setText(formatCalendar(calendar))
                 // update view model
-                viewModel.cardExpiry = strDate
+                viewModel.cardExpiry.onNext(calendar)
             }
             .showDaySpinner(false)
             .minDate(newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), 1)
             .build()
 
-        card_expiry_edit.setOnClickListener {
+        card_expiry_input_edit.setOnClickListener {
             datePickerDialog.show()
         }
-        card_expiry_edit.setOnFocusChangeListener { v, hasFocus ->
+        card_expiry_input_edit.setOnFocusChangeListener { v, hasFocus ->
             if (hasFocus) {
                 datePickerDialog.show()
             }
@@ -140,10 +146,10 @@ class CardValidationActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        outState?.putInt(KEY_CARD_TYPE,viewModel.cardType.ordinal)
-        outState?.putString(KEY_CARD_NUMBER,viewModel.cardNumber)
-        outState?.putString(KEY_CARD_CVC_NUMBER,viewModel.cardCvc)
-        outState?.putString(KEY_CARD_EXPIRY,viewModel.cardExpiry)
+        outState?.putInt(KEY_CARD_TYPE, viewModel.cardType.value?.ordinal!!) // type should be selected
+        outState?.putString(KEY_CARD_NUMBER,viewModel.cardNumber.value)
+        outState?.putString(KEY_CARD_CVC_NUMBER,viewModel.cardCvc.value)
+        outState?.putSerializable(KEY_CARD_EXPIRY,viewModel.cardExpiry.value)
     }
 
     /**
@@ -152,9 +158,9 @@ class CardValidationActivity : AppCompatActivity() {
     fun onCardTypeRadioButtonClicked(view: View) {
         // pass card type selection to view model
         when(view.id) {
-            R.id.radio_visa -> viewModel.cardType = CardType.VISA
-            R.id.radio_master_card -> viewModel.cardType = CardType.MASTER_CARD
-            R.id.radio_american -> viewModel.cardType = CardType.AMERICAN_EXPRESS
+            R.id.radio_visa -> viewModel.cardType.onNext(CardType.VISA)
+            R.id.radio_master_card -> viewModel.cardType.onNext(CardType.MASTER_CARD)
+            R.id.radio_american -> viewModel.cardType.onNext(CardType.AMERICAN_EXPRESS)
         }
     }
 
@@ -169,24 +175,61 @@ class CardValidationActivity : AppCompatActivity() {
     /**
      * Handles view model card number validation state changes.
      */
-    private fun onCardNumberValidationUpdate(status: CardDetailValidationStatus) {
+    private fun onCardNumberValidationUpdate(isValid: Boolean) {
         // display card number status error message if invalid
-        card_number_edit.error = if (!status.isValid) status.errorMessage else null
+        when(isValid) {
+            false -> {
+                card_number_input.helperText = null
+                card_number_input.error = getString(R.string.invalid_card_number)
+            }
+
+            true -> {
+                card_number_input.error = null
+                card_number_input.helperText = getString(R.string.valid_card_number)
+            }
+        }
     }
 
     /**
      * Handles view model card cvc validation state changes.
      */
-    private fun onCardCvcValidationUpdate(status: CardDetailValidationStatus) {
+    private fun onCardCvcValidationUpdate(isValid: Boolean) {
         // display card cvc status error message if invalid
-        card_cvc_edit.error = if (!status.isValid) status.errorMessage else null
+        when(isValid) {
+            false -> {
+                card_cvc_input.helperText = null
+                card_cvc_input.error = getString(R.string.invalid_card_cvc)
+            }
+
+            true -> {
+                card_cvc_input.error = null
+                card_cvc_input.helperText = getString(R.string.valid_card_cvc)
+            }
+        }
     }
 
     /**
      * Handles view model card expiry date validation state changes.
      */
-    private fun onCardExpiryValidationUpdate(status: CardDetailValidationStatus) {
+    private fun onCardExpiryValidationUpdate(isValid: Boolean) {
         // display card expiry status error message if invalid
-        card_expiry_edit.error = if (!status.isValid) status.errorMessage else null
+        when(isValid) {
+            false -> {
+                card_expiry_input.helperText = null
+                card_expiry_input.error = getString(R.string.invalid_card_expiry)
+            }
+
+            true -> {
+                card_expiry_input.error = null
+                card_expiry_input.helperText = getString(R.string.valid_card_expiry)
+            }
+        }
     }
+
+    /**
+     * Format the given calendar value into a ui presentable string.
+     */
+    private fun formatCalendar(calendar: Calendar) =
+        SimpleDateFormat(getString(R.string.date_pattern)).format(calendar.time)
+
 }

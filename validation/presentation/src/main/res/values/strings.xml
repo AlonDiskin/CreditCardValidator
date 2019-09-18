@@ -5,16 +5,18 @@
     <string name="radio_mastercard_label">MasterCard</string>
     <string name="radio_visa_label">VISA</string>
     <string name="radio_american_express_label">American Express</string>
-    <string name="card_number_hint">Your card number</string>
+    <string name="card_number_hint">Card Number</string>
     <string name="card_cvc_hint">CVC</string>
     <string name="button_submit_title">Submit</string>
-    <string name="card_number_title">Card Number</string>
-    <string name="expiry_date_title">Expiry Date</string>
-    <string name="card_expiry_hint">MM/YY</string>
+    <string name="card_expiry_hint">Expiry Date</string>
     <string name="submit_button_title">Submit</string>
     <string name="card_code_title">Card Code</string>
-    <string name="invalid_card_number">Invalid card number!</string>
-    <string name="invalid_card_cvc">Invalid card cvc!</string>
-    <string name="invalid_card_expiry">Invalid card expiry date!</string>
-    <string name="empty_card_detail_error">field cannot be blank</string>
+    <string name="invalid_card_number">invalid card number!</string>
+    <string name="valid_card_number">valid card number</string>
+    <string name="invalid_card_cvc">invalid card cvc!</string>
+    <string name="valid_card_cvc">invalid card cvc!</string>
+    <string name="invalid_card_expiry">invalid card expiry date!</string>
+    <string name="valid_card_expiry">valid card expiry date</string>
+    <string name="empty_card_detail_error">field cannot be blank!</string>
+    <string name="date_pattern">MM/YY</string>
 </resources>

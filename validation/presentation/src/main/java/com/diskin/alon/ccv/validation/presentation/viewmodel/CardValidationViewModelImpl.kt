@@ -3,13 +3,17 @@ package com.diskin.alon.ccv.validation.presentation.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.diskin.alon.ccv.validation.presentation.model.*
+import com.diskin.alon.ccv.validation.presentation.model.CardCvcValidationRequest
+import com.diskin.alon.ccv.validation.presentation.model.CardExpiryValidationRequest
+import com.diskin.alon.ccv.validation.presentation.model.CardNumberValidationRequest
+import com.diskin.alon.ccv.validation.presentation.model.CardType
 import com.diskin.alon.ccv.validation.presentation.util.ServiceExecutor
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.BehaviorSubject
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -18,41 +22,22 @@ import javax.inject.Inject
 class CardValidationViewModelImpl @Inject constructor(private val serviceExecutor: ServiceExecutor)
     : ViewModel(), CardValidationViewModel  {
 
-    companion object {
-        private val DEFAULT_CARD_TYPE = CardType.VISA
-        private const val DEFAULT_CARD_NUMBER = ""
-        private const val DEFAULT_CARD_CVC = ""
-        private const val DEFAULT_CARD_EXPIRY = ""
-    }
+    override val cardType: BehaviorSubject<CardType> = BehaviorSubject.create()
 
-    private val _cardType: BehaviorSubject<CardType> = BehaviorSubject.createDefault(DEFAULT_CARD_TYPE)
-    override var cardType: CardType
-        get() = _cardType.value!! // throw exception if backing property wasn't initialized with default value
-        set(value) {_cardType.onNext(value)}
+    override val cardNumber: BehaviorSubject<String> = BehaviorSubject.create()
 
-    private val _cardNumber: BehaviorSubject<String> = BehaviorSubject.createDefault(DEFAULT_CARD_NUMBER)
-    override var cardNumber: String
-        get() = _cardNumber.value!! // throw exception if backing property wasn't initialized with default value
-        set(value) {_cardNumber.onNext(value)}
+    override val cardCvc: BehaviorSubject<String> = BehaviorSubject.create()
 
-    private val _cardCvc: BehaviorSubject<String> = BehaviorSubject.createDefault(DEFAULT_CARD_CVC)
-    override var cardCvc: String
-        get() = _cardCvc.value!! // throw exception if backing property wasn't initialized with default value
-        set(value) {_cardCvc.onNext(value)}
+    override val cardExpiry: BehaviorSubject<Calendar> = BehaviorSubject.create()
 
-    private val _cardExpiry: BehaviorSubject<String> = BehaviorSubject.createDefault(DEFAULT_CARD_EXPIRY)
-    override var cardExpiry: String
-        get() = _cardExpiry.value!! // throw exception if backing property wasn't initialized with default value
-        set(value) {_cardExpiry.onNext(value)}
+    private val _isCardNumberValid: MutableLiveData<Boolean> = MutableLiveData()
+    override val isCardNumberValid: LiveData<Boolean> = _isCardNumberValid
 
-    private val _isCardNumberValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
-    override val isCardNumberValid: LiveData<CardDetailValidationStatus> = _isCardNumberValid
+    private val _isCardCvcValid: MutableLiveData<Boolean> = MutableLiveData()
+    override val isCardCvcValid: LiveData<Boolean> = _isCardCvcValid
 
-    private val _isCardCvcValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
-    override val isCardCvcValid: LiveData<CardDetailValidationStatus> = _isCardCvcValid
-
-    private val _isCardExpiryValid: MutableLiveData<CardDetailValidationStatus> = MutableLiveData()
-    override val isCardExpiryValid: LiveData<CardDetailValidationStatus> = _isCardExpiryValid
+    private val _isCardExpiryValid: MutableLiveData<Boolean> = MutableLiveData()
+    override val isCardExpiryValid: LiveData<Boolean> = _isCardExpiryValid
 
     private val _isCardValid: MutableLiveData<Boolean> = MutableLiveData()
     override val isCardValid: LiveData<Boolean> = _isCardValid
@@ -80,8 +65,8 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
      */
     private fun subscribeCardNumberObservable() =
         Observable.combineLatest<CardType, String, CardNumberValidationRequest>(
-            _cardType,
-            _cardNumber,
+            cardType.distinctUntilChanged(),
+            cardNumber.distinctUntilChanged(),
             BiFunction { type, number -> CardNumberValidationRequest(type, number) })
             .switchMapSingle { request -> serviceExecutor.execute(request) }
             .observeOn(AndroidSchedulers.mainThread())
@@ -96,8 +81,8 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
      */
     private fun subscribeCardCvcObservable() =
         Observable.combineLatest<CardType, String, CardCvcValidationRequest>(
-            _cardType,
-            _cardCvc,
+            cardType.distinctUntilChanged(),
+            cardCvc.distinctUntilChanged(),
             BiFunction { type, cvc -> CardCvcValidationRequest(type, cvc) })
             .switchMapSingle { request -> serviceExecutor.execute(request) }
             .observeOn(AndroidSchedulers.mainThread())
@@ -111,7 +96,7 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
      * the expiry date property is changed.
      */
     private fun subscribeCardExpiryObservable() =
-        _cardExpiry
+        cardExpiry.distinctUntilChanged()
             .switchMapSingle { expiry -> serviceExecutor.execute(CardExpiryValidationRequest(expiry)) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe ({ status ->
@@ -124,8 +109,8 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
      * as number,cvc number, and expiry date/
      */
     private fun updateCardValidation() {
-        _isCardValid.value = _isCardNumberValid.value?.isValid ?: false
-                && _isCardCvcValid.value?.isValid ?: false
-                && _isCardExpiryValid.value?.isValid ?: false
+        _isCardValid.value = _isCardNumberValid.value ?: false
+                && _isCardCvcValid.value ?: false
+                && _isCardExpiryValid.value ?: false
     }
 }

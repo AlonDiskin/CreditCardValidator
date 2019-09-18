@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="card_number_max">16</integer>
+    <integer name="cvc_code_max">4</integer>
+    <integer name="card_expiry_max">5</integer>
+</resources>

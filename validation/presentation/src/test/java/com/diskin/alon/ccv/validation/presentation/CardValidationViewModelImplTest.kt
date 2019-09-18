@@ -2,7 +2,10 @@ package com.diskin.alon.ccv.validation.presentation
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.ViewModel
-import com.diskin.alon.ccv.validation.presentation.model.*
+import com.diskin.alon.ccv.validation.presentation.model.CardCvcValidationRequest
+import com.diskin.alon.ccv.validation.presentation.model.CardExpiryValidationRequest
+import com.diskin.alon.ccv.validation.presentation.model.CardNumberValidationRequest
+import com.diskin.alon.ccv.validation.presentation.model.CardType
 import com.diskin.alon.ccv.validation.presentation.util.ServiceExecutor
 import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModelImpl
 import com.google.common.truth.Truth.assertThat
@@ -10,7 +13,6 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.SingleSubject
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
@@ -21,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import java.util.*
 
 /**
  * [CardValidationViewModelImpl] unit test class.
@@ -51,9 +54,9 @@ class CardValidationViewModelImplTest {
     lateinit var serviceExecutor: ServiceExecutor
 
     // Collaborator Stubs
-    private val cardNumberValidationStatusSubject: SingleSubject<CardDetailValidationStatus> = SingleSubject.create()
-    private val cardCvcValidationStatusSubject: SingleSubject<CardDetailValidationStatus> = SingleSubject.create()
-    private val cardExpiryValidationStatusSubject: SingleSubject<CardDetailValidationStatus> = SingleSubject.create()
+    private val cardNumberValidationStatusSubject: SingleSubject<Boolean> = SingleSubject.create()
+    private val cardCvcValidationStatusSubject: SingleSubject<Boolean> = SingleSubject.create()
+    private val cardExpiryValidationStatusSubject: SingleSubject<Boolean> = SingleSubject.create()
 
     @Before
     fun setUp() {
@@ -62,37 +65,15 @@ class CardValidationViewModelImplTest {
 
         // stub mocks
         whenever(serviceExecutor.execute(any<CardNumberValidationRequest>()))
-            .thenReturn(cardNumberValidationStatusSubject)
+            .doReturn(cardNumberValidationStatusSubject)
         whenever(serviceExecutor.execute(any<CardCvcValidationRequest>()))
-            .thenReturn(cardCvcValidationStatusSubject)
+            .doReturn(cardCvcValidationStatusSubject)
         whenever(serviceExecutor.execute(any<CardExpiryValidationRequest>()))
-            .thenReturn(cardExpiryValidationStatusSubject)
+            .doReturn(cardExpiryValidationStatusSubject)
 
         // init SUT
         viewModel =
             CardValidationViewModelImpl(serviceExecutor)
-    }
-
-    @Test
-    @Parameters(method = "cardDetailParams")
-    fun shouldUpdateCardState_whenReceiveViewUpdates(type: CardType, number: String, cvc: String, expiry: String) {
-        // Given an initialized view model
-
-        // When card detail is updated by view
-        viewModel.cardType = type
-        viewModel.cardNumber = number
-        viewModel.cardCvc = cvc
-        viewModel.cardExpiry = expiry
-
-        // Then view model should update card detail backing properties
-        assertThat((WhiteBox.getInternalState(viewModel,"_cardType") as BehaviorSubject<*>).value)
-            .isEqualTo(type)
-        assertThat((WhiteBox.getInternalState(viewModel,"_cardNumber") as BehaviorSubject<*>).value)
-            .isEqualTo(number)
-        assertThat((WhiteBox.getInternalState(viewModel,"_cardCvc") as BehaviorSubject<*>).value)
-            .isEqualTo(cvc)
-        assertThat((WhiteBox.getInternalState(viewModel,"_cardExpiry") as BehaviorSubject<*>).value)
-            .isEqualTo(expiry)
     }
 
     @Test
@@ -112,133 +93,137 @@ class CardValidationViewModelImplTest {
 
     @Test
     @Parameters(method = "cardNumberValidationParams")
-    fun shouldValidateCardNumber_whenCardNumberUpdated(numberUpdate: String, validationStatus: CardDetailValidationStatus) {
+    fun shouldValidateCardNumber_whenCardNumberAndCardTypeDistinctlyUpdated(numberUpdate: String,
+                                                                        type: CardType,
+                                                                        validation: Boolean) {
         // Given an initialized view model
-        val expectedEmptyInvocations = 2
 
-        // When card number updated by view
-        viewModel.cardNumber = numberUpdate
+        // When card number and type updated by view
+        viewModel.cardNumber.onNext(numberUpdate)
+        viewModel.cardType.onNext(type)
 
         // Then view model should perform card number validation via service executor
-        if (numberUpdate.isEmpty()) {
-            verify(serviceExecutor, times(expectedEmptyInvocations))
-                .execute(eq(CardNumberValidationRequest(viewModel.cardType,"")))
-
-        } else {
-            verify(serviceExecutor).execute(eq(CardNumberValidationRequest(viewModel.cardType,numberUpdate)))
-        }
+        verify(serviceExecutor).execute(eq(CardNumberValidationRequest(type,numberUpdate)))
 
         // When service executor return result
-        cardNumberValidationStatusSubject.onSuccess(validationStatus)
+        cardNumberValidationStatusSubject.onSuccess(validation)
 
-        // And update execution result to number validation state view observer
-        assertThat(viewModel.isCardNumberValid.value).isEqualTo(validationStatus)
+        // Then update execution result to number validation state view observer
+        assertThat(viewModel.isCardNumberValid.value).isEqualTo(validation)
+
+        // When card number and type updated again by view with same values
+        viewModel.cardNumber.onNext(numberUpdate)
+        viewModel.cardType.onNext(type)
+
+        // Then view model should not perform card number validation on not distinct values
+        verify(serviceExecutor, times(1)).execute(eq(CardNumberValidationRequest(type,numberUpdate)))
     }
 
     @Test
     @Parameters(method = "cardCvcValidationParams")
-    fun shouldValidateCardCvc_whenCardCvcUpdated(cvcUpdate: String, validationStatus: CardDetailValidationStatus) {
+    fun shouldValidateCardCvc_whenCvcCodeAndCardTypeDistinctlyUpdated(cvcUpdate: String,
+                                                 type: CardType,
+                                                 validation: Boolean) {
         // Given an initialized view model
-        val expectedEmptyInvocations = 2
 
-        // When card number updated by view
-        viewModel.cardCvc = cvcUpdate
+        // When cvc code and card type properties are updated by view
+        viewModel.cardCvc.onNext(cvcUpdate)
+        viewModel.cardType.onNext(type)
 
-        // Then view model should perform card number validation via service executor
-        if (cvcUpdate.isEmpty()) {
-            verify(serviceExecutor, times(expectedEmptyInvocations))
-                .execute(eq(CardCvcValidationRequest(viewModel.cardType,"")))
-
-        } else {
-            verify(serviceExecutor).execute(eq(CardCvcValidationRequest(viewModel.cardType,cvcUpdate)))
-        }
+        // Then view model should perform cvc code validation via service executor
+        verify(serviceExecutor).execute(eq(CardCvcValidationRequest(type,cvcUpdate)))
 
         // When service executor return result
-        cardCvcValidationStatusSubject.onSuccess(validationStatus)
+        cardCvcValidationStatusSubject.onSuccess(validation)
 
-        // And update execution result to card cvc validation state view observer
-        assertThat(viewModel.isCardCvcValid.value).isEqualTo(validationStatus)
+        // Then update execution result to card cvc validation state view observer
+        assertThat(viewModel.isCardCvcValid.value).isEqualTo(validation)
+
+        // When cvc code and card type properties are updated by view with same values
+        viewModel.cardCvc.onNext(cvcUpdate)
+        viewModel.cardType.onNext(type)
+
+        // Then view model should not perform cvc validation on not distinct values
+        assertThat(viewModel.isCardCvcValid.value).isEqualTo(validation)
     }
 
     @Test
     @Parameters(method = "cardExpiryValidationParams")
-    fun shouldValidateCardExpiry_whenCardCvcUpdated(expiryUpdate: String, validationStatus: CardDetailValidationStatus) {
+    fun shouldValidateCardExpiry_whenCardExpiryDistinctlyUpdated(expiryUpdate: Calendar, validation: Boolean) {
         // Given an initialized view model
-        val expectedEmptyInvocations = 2
 
         // When card number updated by view
-        viewModel.cardExpiry = expiryUpdate
+        viewModel.cardExpiry.onNext(expiryUpdate)
 
         // Then view model should perform card number validation via service executor
-        if (expiryUpdate.isEmpty()) {
-            verify(serviceExecutor, times(expectedEmptyInvocations))
-                .execute(eq(CardExpiryValidationRequest("")))
-
-        } else {
-            verify(serviceExecutor).execute(eq(CardExpiryValidationRequest(expiryUpdate)))
-        }
+        verify(serviceExecutor).execute(eq(CardExpiryValidationRequest(expiryUpdate)))
 
         // When service executor return result
-        cardExpiryValidationStatusSubject.onSuccess(validationStatus)
+        cardExpiryValidationStatusSubject.onSuccess(validation)
 
-        // And update execution result to expiry validation state view observer
-        assertThat(viewModel.isCardExpiryValid.value).isEqualTo(validationStatus)
+        // Then update execution result to expiry validation state view observer
+        assertThat(viewModel.isCardExpiryValid.value).isEqualTo(validation)
+
+        // When card number updated by view with same value
+        viewModel.cardExpiry.onNext(expiryUpdate)
+
+        // Then view model should not validate expiry on not distinct value
+        assertThat(viewModel.isCardExpiryValid.value).isEqualTo(validation)
     }
 
     @Test
     @Parameters(method = "cardValidationParams")
-    fun shouldValidateCard_whenCardDetailValidationUpdates(number: String,
-                                                           numberStatus: CardDetailValidationStatus,
+    fun shouldValidateCard_whenCardDetailValidationUpdates( type: CardType,
+                                                            number: String,
+                                                           numberStatus: Boolean,
                                                            cvc: String,
-                                                           cvcStatus: CardDetailValidationStatus,
-                                                           expiry: String,
-                                                           expiryStatus: CardDetailValidationStatus,
+                                                           cvcStatus: Boolean,
+                                                           expiry: Calendar,
+                                                           expiryStatus: Boolean,
                                                            validation: Boolean) {
         // Given an initialized view model
 
         // When view updates view model card detail
-        viewModel.cardNumber = number
+        viewModel.cardType.onNext(type)
+        viewModel.cardNumber.onNext(number)
         cardNumberValidationStatusSubject.onSuccess(numberStatus)
-        viewModel.cardCvc = cvc
+        viewModel.cardCvc.onNext(cvc)
         cardCvcValidationStatusSubject.onSuccess(cvcStatus)
-        viewModel.cardExpiry = expiry
+        viewModel.cardExpiry.onNext(expiry)
         cardExpiryValidationStatusSubject.onSuccess(expiryStatus)
 
         // Then view model should validate card
         assertThat(viewModel.isCardValid.value).isEqualTo(validation)
     }
 
-    fun cardDetailParams() = arrayOf(arrayOf(CardType.VISA,"123445","345","12/20"),
-        arrayOf(CardType.MASTER_CARD,"123456745","4356345","10/20"))
+    fun cardNumberValidationParams() = arrayOf(arrayOf("123445",CardType.MASTER_CARD,true),
+        arrayOf("",CardType.VISA,true),
+        arrayOf("1",CardType.AMERICAN_EXPRESS,false))
 
-    fun cardNumberValidationParams() = arrayOf(arrayOf("123445",CardDetailValidationStatus.valid()),
-        arrayOf("",CardDetailValidationStatus.invalid("number validation error message")),
-        arrayOf("1",CardDetailValidationStatus.valid()),
-        arrayOf("654",CardDetailValidationStatus.invalid("validation error message")))
+    fun cardCvcValidationParams() = arrayOf(arrayOf("125",CardType.AMERICAN_EXPRESS,true),
+        arrayOf("09876",CardType.VISA,false),
+        arrayOf("",CardType.MASTER_CARD,false))
 
-    fun cardCvcValidationParams() = arrayOf(arrayOf("125",CardDetailValidationStatus.valid()),
-        arrayOf("09876",CardDetailValidationStatus.invalid("message")),
-        arrayOf("",CardDetailValidationStatus.invalid("cvc validation error message")),
-        arrayOf("15959",CardDetailValidationStatus.valid()))
-
-    fun cardExpiryValidationParams() = arrayOf(arrayOf("12/24",CardDetailValidationStatus.valid()),
-        arrayOf("09876",CardDetailValidationStatus.invalid("message")),
-        arrayOf("",CardDetailValidationStatus.invalid("cvc validation error message")),
-        arrayOf("15/59",CardDetailValidationStatus.valid()))
+    fun cardExpiryValidationParams() = arrayOf(arrayOf(Calendar.getInstance(),true),
+        arrayOf(GregorianCalendar(2020,2,8),false),
+        arrayOf(GregorianCalendar(2010,10,2),false),
+        arrayOf(GregorianCalendar(2024,7,18),true))
 
     fun cardValidationParams() = arrayOf(
-        arrayOf("",
-            CardDetailValidationStatus.invalid("message"),
+        arrayOf(CardType.MASTER_CARD,
             "",
-            CardDetailValidationStatus.invalid("error"),
-            "12/30",
-            CardDetailValidationStatus.valid(),
+            false,
+            "",
+            true,
+            GregorianCalendar(2010,2,8),
+            true,
             false),
-        arrayOf("123",
-            CardDetailValidationStatus.valid(),
+        arrayOf(CardType.AMERICAN_EXPRESS,
+            "123",
+            true,
             "",
-            CardDetailValidationStatus.valid(),
-            "12/30",
-            CardDetailValidationStatus.valid(),
+            true,
+            GregorianCalendar(2020,2,8),
+            true,
             true))
 }

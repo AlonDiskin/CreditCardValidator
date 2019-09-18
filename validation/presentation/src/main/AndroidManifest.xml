@@ -6,7 +6,6 @@
         <activity
             android:name=".controller.CardValidationActivity"
             android:label="@string/title_activity_validation"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -2,7 +2,8 @@ package com.diskin.alon.ccv.validation.presentation.viewmodel
 
 import androidx.lifecycle.LiveData
 import com.diskin.alon.ccv.validation.presentation.model.CardType
-import com.diskin.alon.ccv.validation.presentation.model.CardDetailValidationStatus
+import io.reactivex.subjects.BehaviorSubject
+import java.util.*
 
 /**
  * Card validation screen view model contract.
@@ -12,22 +13,22 @@ interface CardValidationViewModel {
     /**
      * Credit card type.
      */
-    var cardType: CardType
+    val cardType: BehaviorSubject<CardType>
 
     /**
      * Credit card number.
      */
-    var cardNumber: String
+    val cardNumber: BehaviorSubject<String>
 
     /**
      * Credit card cvc number.
      */
-    var cardCvc: String
+    val cardCvc: BehaviorSubject<String>
 
     /**
      * Credit card expiry date.
      */
-    var cardExpiry: String
+    val cardExpiry: BehaviorSubject<Calendar>
 
     /**
      * Credit card detail validation status.
@@ -39,21 +40,21 @@ interface CardValidationViewModel {
     /**
      * Credit card number validation status.
      *
-     * @return [LiveData] containing number validation status data.
+     * @return [LiveData] containing number validation status.
      */
-    val isCardNumberValid: LiveData<CardDetailValidationStatus>
+    val isCardNumberValid: LiveData<Boolean>
 
     /**
      * Credit card cvc validation status.
      *
-     * @return [LiveData] containing card cvc validation status data.
+     * @return [LiveData] containing card cvc validation status.
      */
-    val isCardCvcValid: LiveData<CardDetailValidationStatus>
+    val isCardCvcValid: LiveData<Boolean>
 
     /**
      * Credit card expiry date validation status.
      *
-     * @return [LiveData] containing card expiry validation status data.
+     * @return [LiveData] containing card expiry validation status.
      */
-    val isCardExpiryValid: LiveData<CardDetailValidationStatus>
+    val isCardExpiryValid: LiveData<Boolean>
 }

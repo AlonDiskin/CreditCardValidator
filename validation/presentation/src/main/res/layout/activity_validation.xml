@@ -1,152 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".controller.CardValidationActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        tools:title="@string/app_name" />
-
-    <TextView
-        android:id="@+id/card_type_title"
-        android:layout_width="wrap_content"
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/card_detail_vertical_margin"
-        android:layout_marginStart="@dimen/horizontal_margin"
-        android:text="@string/card_type_title"
-        style="@style/AppTheme.CardDetailTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-    <RadioGroup
-        android:id="@+id/radioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/detail_title_vertical_margin"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="@+id/card_type_title"
-        app:layout_constraintTop_toBottomOf="@+id/card_type_title">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="@string/app_name"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-        <RadioButton
-            android:id="@+id/radio_visa"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/radio_buttons_vertical_margin"
-            android:text="@string/radio_visa_label"
-            style="@style/AppTheme.CardTypeTitle"
-            android:onClick="onCardTypeRadioButtonClicked"
-            tools:checked="true" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <RadioButton
-            android:id="@+id/radio_master_card"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/radio_buttons_vertical_margin"
-            android:text="@string/radio_mastercard_label"
-            android:onClick="onCardTypeRadioButtonClicked"
-            style="@style/AppTheme.CardTypeTitle" />
+    <include layout="@layout/content_validation" />
 
-        <RadioButton
-            android:id="@+id/radio_american"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/radio_american_express_label"
-            android:onClick="onCardTypeRadioButtonClicked"
-            style="@style/AppTheme.CardTypeTitle" />
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/card_number_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/card_detail_vertical_margin"
-        android:text="@string/card_number_title"
-        style="@style/AppTheme.CardDetailTitle"
-        app:layout_constraintStart_toStartOf="@+id/radioGroup"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
-
-    <EditText
-        android:id="@+id/card_number_edit"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/detail_title_vertical_margin"
-        android:layout_marginEnd="@dimen/horizontal_margin"
-        android:ems="10"
-        android:hint="@string/card_number_hint"
-        android:inputType="phone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/card_number_title"
-        app:layout_constraintTop_toBottomOf="@+id/card_number_title" />
-
-    <TextView
-        android:id="@+id/card_expiry_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/card_detail_vertical_margin"
-        android:text="@string/expiry_date_title"
-        style="@style/AppTheme.CardDetailTitle"
-        app:layout_constraintStart_toStartOf="@+id/card_number_edit"
-        app:layout_constraintTop_toBottomOf="@+id/card_number_edit" />
-
-    <EditText
-        android:id="@+id/card_expiry_edit"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/detail_title_vertical_margin"
-        android:layout_marginEnd="@dimen/horizontal_margin"
-        android:ems="10"
-        android:hint="@string/card_expiry_hint"
-        android:inputType="date"
-        app:layout_constraintEnd_toStartOf="@+id/card_cvc_edit"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        android:layout_marginStart="@dimen/horizontal_margin"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card_expiry_title" />
-
-    <EditText
-        android:id="@+id/card_cvc_edit"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/horizontal_margin"
-        android:layout_marginEnd="@dimen/horizontal_margin"
-        android:ems="10"
-        android:maxLength="4"
-        android:inputType="phone"
-        android:hint="@string/card_cvc_hint"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/card_expiry_edit"
-        app:layout_constraintTop_toTopOf="@+id/card_expiry_edit" />
-
-    <TextView
-        android:id="@+id/card_cvc_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/card_code_title"
-        style="@style/AppTheme.CardDetailTitle"
-        app:layout_constraintBottom_toBottomOf="@+id/card_expiry_title"
-        app:layout_constraintStart_toStartOf="@+id/card_cvc_edit" />
-
-    <Button
-        android:id="@+id/button_submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/submit_button_title"
-        android:enabled="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card_expiry_edit" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
