@@ -1,6 +1,6 @@
 package com.diskin.alon.ccv.validation.domain
 
-import com.diskin.alon.ccv.validation.domain.CardType.*
+import com.diskin.alon.ccv.validation.domain.ValidatedCardType.*
 import java.util.*
 import java.util.regex.Pattern
 
@@ -10,7 +10,7 @@ import java.util.regex.Pattern
  * @param cvcPattern expected cvc code pattern for each type.
  * @param numberPattern expected card number pattern for each type.
  */
-enum class CardType(val cvcPattern: Pattern, val numberPattern: Pattern) {
+enum class ValidatedCardType(val cvcPattern: Pattern, val numberPattern: Pattern) {
     VISA(Pattern.compile("^[0-9]{3}$"),Pattern.compile("^4[0-9]{12}(?:[0-9]{3})?$")),
     MASTER_CARD(Pattern.compile("^[0-9]{3}$"), Pattern.compile("^5[1-5][0-9]{14}$")),
     AMERICAN_EXPRESS(Pattern.compile("^[0-9]{4}$"),Pattern.compile("^3[47][0-9]{13}$"))
@@ -23,7 +23,7 @@ enum class CardType(val cvcPattern: Pattern, val numberPattern: Pattern) {
  * @param type the card type.
  * @return true if cvc code is valid, false otherwise
  */
-fun validateCardCvcCode(code: String, type: CardType) =
+fun validateCardCvcCode(code: String, type: ValidatedCardType) =
     // validate by matching expected code pattern
     when(type) {
         VISA -> VISA.cvcPattern.matcher(code).matches()
@@ -38,7 +38,7 @@ fun validateCardCvcCode(code: String, type: CardType) =
  * @param type the card type.
  * @return true if card number is valid, false otherwise
  */
-fun validateCardNumber(number: String, type: CardType) =
+fun validateCardNumber(number: String, type: ValidatedCardType) =
     // validate by matching expected number pattern and checksum verification
     when(type) {
         VISA -> VISA.numberPattern.matcher(number).matches()

@@ -1,7 +1,7 @@
 package com.diskin.alon.ccv.validation.presentation.viewmodel
 
 import androidx.lifecycle.LiveData
-import com.diskin.alon.ccv.validation.presentation.model.CardType
+import com.diskin.alon.ccv.validation.services.model.CardType
 import io.reactivex.subjects.BehaviorSubject
 import java.util.*
 

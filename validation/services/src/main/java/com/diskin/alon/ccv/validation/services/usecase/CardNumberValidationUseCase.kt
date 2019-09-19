@@ -2,7 +2,7 @@ package com.diskin.alon.ccv.validation.services.usecase
 
 import com.diskin.alon.ccv.validation.domain.validateCardNumber
 import com.diskin.alon.ccv.validation.services.util.mapToDomainType
-import com.diskin.alon.ccv.validation.services.model.CardTypeDto
+import com.diskin.alon.ccv.validation.services.model.CardType
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
@@ -16,5 +16,5 @@ class CardNumberValidationUseCase : UseCase<CardNumberValidationUseCase.Params, 
 
         }.subscribeOn(Schedulers.computation())
 
-    data class Params(val number: String, val cardType: CardTypeDto)
+    data class Params(val number: String, val cardType: CardType)
 }

@@ -1,14 +1,14 @@
 package com.diskin.alon.ccv.validation.services.util
 
-import com.diskin.alon.ccv.validation.domain.CardType
-import com.diskin.alon.ccv.validation.services.model.CardTypeDto
+import com.diskin.alon.ccv.validation.domain.ValidatedCardType
+import com.diskin.alon.ccv.validation.services.model.CardType
 
 /**
  * Extends card type enum to map its value to domain card type.
  */
-fun CardTypeDto.mapToDomainType(): CardType =
+fun CardType.mapToDomainType(): ValidatedCardType =
     when(this) {
-        CardTypeDto.VISA -> CardType.VISA
-        CardTypeDto.MASTER_CARD -> CardType.MASTER_CARD
-        CardTypeDto.AMERICAN_EXPRESS -> CardType.AMERICAN_EXPRESS
+        CardType.VISA -> ValidatedCardType.VISA
+        CardType.MASTER_CARD -> ValidatedCardType.MASTER_CARD
+        CardType.AMERICAN_EXPRESS -> ValidatedCardType.AMERICAN_EXPRESS
     }

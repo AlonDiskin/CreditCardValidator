@@ -1,7 +1,7 @@
 <resources>
     <dimen name="card_detail_vertical_margin">32dp</dimen>
     <dimen name="card_input_vertical_margin">16dp</dimen>
-    <dimen name="radio_buttons_vertical_margin">4dp</dimen>
+    <dimen name="radio_buttons_vertical_margin">16dp</dimen>
     <dimen name="card_types_vertical_margin">32dp</dimen>
     <dimen name="detail_title_vertical_margin">0dp</dimen>
     <dimen name="detail_space_margin">16dp</dimen>

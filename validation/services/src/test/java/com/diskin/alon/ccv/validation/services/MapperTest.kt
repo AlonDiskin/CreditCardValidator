@@ -1,7 +1,7 @@
 package com.diskin.alon.ccv.validation.services
 
-import com.diskin.alon.ccv.validation.domain.CardType
-import com.diskin.alon.ccv.validation.services.model.CardTypeDto
+import com.diskin.alon.ccv.validation.domain.ValidatedCardType
+import com.diskin.alon.ccv.validation.services.model.CardType
 import com.diskin.alon.ccv.validation.services.util.mapToDomainType
 import com.google.common.truth.Truth.assertThat
 import junitparams.JUnitParamsRunner
@@ -17,12 +17,12 @@ class MapperTest {
 
     @Test
     @Parameters(method = "mapToDomainParams")
-    fun mapCardTypeDtoToDomainTypeTest(cardTypeDto: CardTypeDto, cardType: CardType) {
+    fun mapCardTypeDtoToDomainTypeTest(cardTypeDto: CardType, cardType: ValidatedCardType) {
         assertThat(cardTypeDto.mapToDomainType()).isEqualTo(cardType)
     }
 
     fun mapToDomainParams() = arrayOf(
-        arrayOf(CardTypeDto.VISA, CardType.VISA),
-        arrayOf(CardTypeDto.MASTER_CARD, CardType.MASTER_CARD),
-        arrayOf(CardTypeDto.AMERICAN_EXPRESS, CardType.AMERICAN_EXPRESS))
+        arrayOf(CardType.VISA, ValidatedCardType.VISA),
+        arrayOf(CardType.MASTER_CARD, ValidatedCardType.MASTER_CARD),
+        arrayOf(CardType.AMERICAN_EXPRESS, ValidatedCardType.AMERICAN_EXPRESS))
 }

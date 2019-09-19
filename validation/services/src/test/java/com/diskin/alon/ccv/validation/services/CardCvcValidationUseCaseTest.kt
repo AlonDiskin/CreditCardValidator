@@ -1,7 +1,7 @@
 package com.diskin.alon.ccv.validation.services
 
 import com.diskin.alon.ccv.validation.domain.validateCardCvcCode
-import com.diskin.alon.ccv.validation.services.model.CardTypeDto
+import com.diskin.alon.ccv.validation.services.model.CardType
 import com.diskin.alon.ccv.validation.services.usecase.CardCvcValidationUseCase
 import com.diskin.alon.ccv.validation.services.usecase.CardCvcValidationUseCase.Params
 import com.diskin.alon.ccv.validation.services.util.mapToDomainType
@@ -49,7 +49,7 @@ class CardCvcValidationUseCaseTest {
     }
 
     fun useExecutionParams() = arrayOf(
-        arrayOf(Params("1234", CardTypeDto.VISA),false),
-        arrayOf(Params("1234634", CardTypeDto.MASTER_CARD),false),
-        arrayOf(Params("678967", CardTypeDto.AMERICAN_EXPRESS),true))
+        arrayOf(Params("1234", CardType.VISA),false),
+        arrayOf(Params("1234634", CardType.MASTER_CARD),false),
+        arrayOf(Params("678967", CardType.AMERICAN_EXPRESS),true))
 }

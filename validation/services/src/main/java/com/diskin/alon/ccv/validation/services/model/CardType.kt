@@ -1,5 +1,5 @@
 package com.diskin.alon.ccv.validation.services.model
 
-enum class CardTypeDto {
+enum class CardType {
     VISA,MASTER_CARD,AMERICAN_EXPRESS
 }

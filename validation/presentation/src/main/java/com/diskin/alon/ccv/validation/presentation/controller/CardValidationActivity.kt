@@ -8,8 +8,9 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.diskin.alon.ccv.validation.presentation.R
-import com.diskin.alon.ccv.validation.presentation.model.CardType
+import com.diskin.alon.ccv.validation.presentation.util.setReadOnly
 import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
+import com.diskin.alon.ccv.validation.services.model.CardType
 import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_validation.*
@@ -106,9 +107,9 @@ class CardValidationActivity : AppCompatActivity() {
             }
         })
 
-        // setup card expiry date field listeners
-        card_expiry_input_edit.inputType = InputType.TYPE_NULL
-        val newCalendar = Calendar.getInstance()
+        // setup card expiry date input field
+        card_expiry_input.editText?.setReadOnly(true, InputType.TYPE_NULL)
+
         val datePickerDialog = SpinnerDatePickerDialogBuilder()
             .context(this)
             .callback { view, year, monthOfYear, dayOfMonth ->
@@ -122,17 +123,10 @@ class CardValidationActivity : AppCompatActivity() {
                 viewModel.cardExpiry.onNext(calendar)
             }
             .showDaySpinner(false)
-            .minDate(newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), 1)
+            .defaultDate(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), 1)
             .build()
 
-        card_expiry_input_edit.setOnClickListener {
-            datePickerDialog.show()
-        }
-        card_expiry_input_edit.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                datePickerDialog.show()
-            }
-        }
+        card_expiry_input.setEndIconOnClickListener { v -> datePickerDialog.show() }
 
         // observe card validation state
         viewModel.isCardValid.observe(this, Observer { onCardValidationUpdate(it) })
@@ -144,12 +138,12 @@ class CardValidationActivity : AppCompatActivity() {
         viewModel.isCardExpiryValid.observe(this, Observer { onCardExpiryValidationUpdate(it) })
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.putInt(KEY_CARD_TYPE, viewModel.cardType.value?.ordinal!!) // type should be selected
-        outState?.putString(KEY_CARD_NUMBER,viewModel.cardNumber.value)
-        outState?.putString(KEY_CARD_CVC_NUMBER,viewModel.cardCvc.value)
-        outState?.putSerializable(KEY_CARD_EXPIRY,viewModel.cardExpiry.value)
+        outState.putInt(KEY_CARD_TYPE, viewModel.cardType.value?.ordinal!!) // type should be selected
+        outState.putString(KEY_CARD_NUMBER,viewModel.cardNumber.value)
+        outState.putString(KEY_CARD_CVC_NUMBER,viewModel.cardCvc.value)
+        outState.putSerializable(KEY_CARD_EXPIRY,viewModel.cardExpiry.value)
     }
 
     /**
@@ -177,16 +171,15 @@ class CardValidationActivity : AppCompatActivity() {
      */
     private fun onCardNumberValidationUpdate(isValid: Boolean) {
         // display card number status error message if invalid
-        when(isValid) {
-            false -> {
-                card_number_input.helperText = null
-                card_number_input.error = getString(R.string.invalid_card_number)
-            }
+        if (viewModel.cardNumber.value?.isNotEmpty() == true) {
+            when(isValid) {
+                false -> card_number_input.error = getString(R.string.invalid_card_number)
 
-            true -> {
-                card_number_input.error = null
-                card_number_input.helperText = getString(R.string.valid_card_number)
+                true -> card_number_input.helperText = getString(R.string.valid_card_number)
             }
+        } else {
+            card_number_input.error = null
+            card_number_input.helperText = null
         }
     }
 
@@ -195,16 +188,15 @@ class CardValidationActivity : AppCompatActivity() {
      */
     private fun onCardCvcValidationUpdate(isValid: Boolean) {
         // display card cvc status error message if invalid
-        when(isValid) {
-            false -> {
-                card_cvc_input.helperText = null
-                card_cvc_input.error = getString(R.string.invalid_card_cvc)
-            }
+        if (viewModel.cardCvc.value?.isNotEmpty() == true) {
+            when(isValid) {
+                false -> card_cvc_input.error = getString(R.string.invalid_card_cvc)
 
-            true -> {
-                card_cvc_input.error = null
-                card_cvc_input.helperText = getString(R.string.valid_card_cvc)
+                true -> card_cvc_input.helperText = getString(R.string.valid_card_cvc)
             }
+        } else {
+            card_cvc_input.error = null
+            card_cvc_input.helperText = null
         }
     }
 
@@ -214,15 +206,9 @@ class CardValidationActivity : AppCompatActivity() {
     private fun onCardExpiryValidationUpdate(isValid: Boolean) {
         // display card expiry status error message if invalid
         when(isValid) {
-            false -> {
-                card_expiry_input.helperText = null
-                card_expiry_input.error = getString(R.string.invalid_card_expiry)
-            }
+            false -> card_expiry_input.error = getString(R.string.invalid_card_expiry)
 
-            true -> {
-                card_expiry_input.error = null
-                card_expiry_input.helperText = getString(R.string.valid_card_expiry)
-            }
+            true -> card_expiry_input.helperText = getString(R.string.valid_card_expiry)
         }
     }
 

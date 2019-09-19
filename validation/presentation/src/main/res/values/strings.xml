@@ -14,9 +14,9 @@
     <string name="invalid_card_number">invalid card number!</string>
     <string name="valid_card_number">valid card number</string>
     <string name="invalid_card_cvc">invalid card cvc!</string>
-    <string name="valid_card_cvc">invalid card cvc!</string>
-    <string name="invalid_card_expiry">invalid card expiry date!</string>
-    <string name="valid_card_expiry">valid card expiry date</string>
-    <string name="empty_card_detail_error">field cannot be blank!</string>
+    <string name="valid_card_cvc">valid card cvc</string>
+    <string name="invalid_card_expiry">invalid card expiry!</string>
+    <string name="valid_card_expiry">valid card expiry</string>
     <string name="date_pattern">MM/YY</string>
+    <string name="expiry_icon_description">pick expiry date</string>
 </resources>

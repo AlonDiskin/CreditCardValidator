@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.diskin.alon.ccv.validation.presentation.model.CardCvcValidationRequest
 import com.diskin.alon.ccv.validation.presentation.model.CardExpiryValidationRequest
 import com.diskin.alon.ccv.validation.presentation.model.CardNumberValidationRequest
-import com.diskin.alon.ccv.validation.presentation.model.CardType
 import com.diskin.alon.ccv.validation.presentation.util.ServiceExecutor
+import com.diskin.alon.ccv.validation.services.model.CardType
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable

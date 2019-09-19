@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import com.diskin.alon.ccv.validation.presentation.model.CardCvcValidationRequest
 import com.diskin.alon.ccv.validation.presentation.model.CardExpiryValidationRequest
 import com.diskin.alon.ccv.validation.presentation.model.CardNumberValidationRequest
-import com.diskin.alon.ccv.validation.presentation.model.CardType
 import com.diskin.alon.ccv.validation.presentation.util.ServiceExecutor
 import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModelImpl
+import com.diskin.alon.ccv.validation.services.model.CardType
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.android.plugins.RxAndroidPlugins
@@ -94,8 +94,8 @@ class CardValidationViewModelImplTest {
     @Test
     @Parameters(method = "cardNumberValidationParams")
     fun shouldValidateCardNumber_whenCardNumberAndCardTypeDistinctlyUpdated(numberUpdate: String,
-                                                                        type: CardType,
-                                                                        validation: Boolean) {
+                                                                            type: CardType,
+                                                                            validation: Boolean) {
         // Given an initialized view model
 
         // When card number and type updated by view

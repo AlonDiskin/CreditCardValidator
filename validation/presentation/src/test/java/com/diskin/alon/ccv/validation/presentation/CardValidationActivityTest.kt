@@ -12,8 +12,8 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.diskin.alon.ccv.validation.presentation.controller.CardValidationActivity
-import com.diskin.alon.ccv.validation.presentation.model.CardType
 import com.diskin.alon.ccv.validation.presentation.viewmodel.CardValidationViewModel
+import com.diskin.alon.ccv.validation.services.model.CardType
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.*
 import com.tsongkha.spinnerdatepicker.DatePicker
@@ -193,7 +193,9 @@ class CardValidationActivityTest {
 
     @Test
     fun shouldUpdateCardNumberInfoText_whenValidationStateUpdates() {
-        // Given a resumed activity
+        // Given a resumed activity with typed card number
+        onView(withId(R.id.card_number_input_edit))
+            .perform(typeText("123"))
 
         // When card number updates to invalid
         isCardNumberValid.value = false
@@ -201,7 +203,6 @@ class CardValidationActivityTest {
         // Then activity should display an error message in card number edit field
         scenario.onActivity { activity ->
             assertThat(activity.card_number_input.error).isEqualTo(context.getString(R.string.invalid_card_number))
-            assertThat(activity.card_number_input.helperText).isNull()
         }
 
         // When card number updates to valid
@@ -209,7 +210,6 @@ class CardValidationActivityTest {
 
         // Then activity should remove error message from card number edit field, and show valid number message
         scenario.onActivity { activity ->
-            assertThat(activity.card_number_input.error).isNull()
             assertThat(activity.card_number_input.helperText).isEqualTo(context.getString(R.string.valid_card_number))
         }
     }
@@ -247,7 +247,9 @@ class CardValidationActivityTest {
 
     @Test
     fun shouldUpdateCardCvcInfoText_whenValidationStateUpdates() {
-        // Given a resumed activity
+        // Given a resumed activity with typed cvc code
+        onView(withId(R.id.card_cvc_input_edit))
+            .perform(typeText("123"))
 
         // When card cvc updates to invalid
         isCardCvcValid.value = false
@@ -255,7 +257,6 @@ class CardValidationActivityTest {
         // Then activity should display an error message in card cvc edit field
         scenario.onActivity { activity ->
             assertThat(activity.card_cvc_input.error).isEqualTo(context.getString(R.string.invalid_card_cvc))
-            assertThat(activity.card_cvc_input.helperText).isNull()
         }
 
         // When card cvc updates to valid
@@ -263,7 +264,6 @@ class CardValidationActivityTest {
 
         // Then activity should remove error message from card cvc edit field, and show valid number message
         scenario.onActivity { activity ->
-            assertThat(activity.card_cvc_input.error).isNull()
             assertThat(activity.card_cvc_input.helperText).isEqualTo(context.getString(R.string.valid_card_cvc))
         }
     }
@@ -273,7 +273,7 @@ class CardValidationActivityTest {
         // Given a resumed activity
 
         //  When expiry edit field is clicked
-        onView(withId(R.id.card_expiry_input_edit))
+        onView(withContentDescription(R.string.expiry_icon_description))
             .perform(click())
 
         // And expiry date is picked
@@ -302,7 +302,7 @@ class CardValidationActivityTest {
         // Given a resumed activity
 
         //  When expiry edit field is clicked
-        onView(withId(R.id.card_expiry_input_edit))
+        onView(withContentDescription(R.string.expiry_icon_description))
             .perform(click())
 
         // And expiry date is picked
@@ -339,7 +339,6 @@ class CardValidationActivityTest {
         // Then activity should display an error message in card expiry edit field
         scenario.onActivity { activity ->
             assertThat(activity.card_expiry_input.error).isEqualTo(context.getString(R.string.invalid_card_expiry))
-            assertThat(activity.card_expiry_input.helperText).isNull()
         }
 
         // When card expiry updates to valid
@@ -347,7 +346,6 @@ class CardValidationActivityTest {
 
         // Then activity should remove error message from card expiry edit field, and show valid number message
         scenario.onActivity { activity ->
-            assertThat(activity.card_expiry_input.error).isNull()
             assertThat(activity.card_expiry_input.helperText).isEqualTo(context.getString(R.string.valid_card_expiry))
         }
     }
