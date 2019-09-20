@@ -1,6 +1,7 @@
 package com.diskin.alon.ccv.validation.presentation
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.diskin.alon.ccv.validation.presentation.model.CardCvcValidationRequest
 import com.diskin.alon.ccv.validation.presentation.model.CardExpiryValidationRequest
@@ -89,6 +90,14 @@ class CardValidationViewModelImplTest {
 
         // Then view model should dispose of all its observable subscriptions
         assertThat(compositeDisposable.isDisposed).isTrue()
+    }
+
+    @Test
+    fun shouldSetCardValidationAsFalse_whenCreated() {
+        // Given an initialized view model
+
+        // Then view model should set card validation state as 'false' by default
+        assertThat(viewModel.isCardValid.value).isFalse()
     }
 
     @Test

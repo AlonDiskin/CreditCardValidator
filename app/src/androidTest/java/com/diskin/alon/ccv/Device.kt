@@ -41,6 +41,16 @@ fun launchApp() {
         .wait(hasObject(By.pkg(appPackage).depth(0)), timeout)
 }
 
+fun rotateDeviceToLandsacpe() {
+    UiDevice.getInstance(getInstrumentation())
+        .setOrientationLeft()
+}
+
+fun rotateDeviceToPortrait() {
+    UiDevice.getInstance(getInstrumentation())
+        .setOrientationNatural()
+}
+
 private fun getLaunchPackageName(): String {
     // Create launcher Intent
     val intent = Intent(Intent.ACTION_MAIN)

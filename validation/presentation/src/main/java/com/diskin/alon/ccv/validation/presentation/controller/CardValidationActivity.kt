@@ -218,4 +218,16 @@ class CardValidationActivity : AppCompatActivity() {
     private fun formatCalendar(calendar: Calendar) =
         SimpleDateFormat(getString(R.string.date_pattern)).format(calendar.time)
 
+    /**
+     * Handles submit button click events.
+     */
+    fun onSubmitClicked(view: View) {
+        // clear all input fields
+        card_cvc_input_edit.setText("")
+        card_number_input_edit.setText("")
+        card_expiry_input_edit.setText("")
+        // clear expiry info text field (has no listener)
+        card_expiry_input.helperText = null
+    }
+
 }

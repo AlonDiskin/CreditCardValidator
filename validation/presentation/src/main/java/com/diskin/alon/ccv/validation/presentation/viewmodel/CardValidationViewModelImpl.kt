@@ -49,6 +49,9 @@ class CardValidationViewModelImpl @Inject constructor(private val serviceExecuto
         compositeDisposable.addAll(subscribeCardNumberObservable(),
             subscribeCardCvcObservable(),
             subscribeCardExpiryObservable())
+
+        // set card validation to false
+        _isCardValid.value = false
     }
 
     override fun onCleared() {

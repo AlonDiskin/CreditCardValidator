@@ -9,25 +9,27 @@ Feature: Card Validation
 
   @card-validated
   Scenario Outline: Credit card is validated
-    Given User enters a valid card "<number>" of type "<type>"
-    And Enters "<cvc>" and "<expires>" date
+    And User entered card number "<number>",type "<type>", cvc "<cvc>", expiry month "<expiry month>" year "<expiry year>"
+    And User Rotates device to landscape
     Then Card should be validated
+    When User submits card detail
+    Then Detail input fields should be cleared
 
     Examples:
-      | type             | number           | expires | cvc  |
-      | Visa             | 4111111111111111 | 12/25   | 231  |
-      | MasterCard       | 5500000000000004 | 11/22   | 4723 |
-      | American Express | 340000000000009  | 06/24   | 429  |
+      | type             | number           | cvc  | expiry month | expiry year |
+      | Visa             | 4111111111111111 | 231  | 10           | 2025        |
+      | MasterCard       | 5500000000000004 | 472  | 2            | 2022        |
+      | American Express | 340000000000009  | 4291 | 7            | 2026        |
 
   @card-not-validated
   Scenario Outline: Credit card not validated
-    Given User enters an invalid card "<number>" of type "<type>"
-    And Enters "<cvc>" and "<expires>" date
-    Then Card should not be validated
+    And User entered card number "<number>",type "<type>", cvc "<cvc>", expiry month "<expiry month>" year "<expiry year>"
+    And User Rotates device to landscape
+    Then Card should not be validated by "<wrong detail>"
 
     Examples:
-      | type             | number           | expires | cvc  |
-      | Visa             | 7111111111111111 | 12/25   | 231  |
-      | Visa             | 41111111         | 12/25   | 231  |
-      | MasterCard       | 5500000000000004 | 11/22   | 473  |
-      | American Express | 940000000000009  | 06/24   | 429  |
+      | type             | number           | cvc  | expiry month | expiry year | wrong detail |
+      | Visa             | 4111111111111111 | 2314 | 10           | 2025        | cvc          |
+      | MasterCard       | 7500000000000004 | 473  | 12           | 2025        | number       |
+      | American Express | 340000000000009  | 4276 | 3            | 2012        | expiry       |
+      | Visa             | 9111111111111111 | 2314 | 11           | 2005        | all          |

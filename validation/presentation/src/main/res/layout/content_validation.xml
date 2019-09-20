@@ -132,6 +132,7 @@
         android:layout_height="wrap_content"
         android:text="@string/submit_button_title"
         android:textStyle="bold"
+        android:onClick="onSubmitClicked"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
